@@ -6,11 +6,7 @@ import javax.swing.*;
  */
 public class App {
 
-    JFrame frame;
-    // TODO: Custom implementation of JPanel.
-    JPanel mainPanel;
-
-    /**""
+    /**
      * Constructor...
      */
     public App() {
@@ -18,15 +14,15 @@ public class App {
         SwingUtilities.invokeLater(() -> {
             
             // Set Frame title.
-            frame = new JFrame("DOOM-Like");
-            mainPanel = new JPanel();
+            JFrame frame = new JFrame("DOOM-Like");
 
-            mainPanel.setBackground(new Color(255, 255, 255));
-            mainPanel.add(new JLabel("Hello world!!!!"));
+            // Create Projection Plane
+            ProjectionPlane mainPanel = new ProjectionPlane();
 
-            // Attach panel to frame and make visible and exitable.
+            // Attach panel to frame + frame settings.
             frame.add(mainPanel);
             frame.setSize(740, 400);
+            frame.setResizable(false);
             frame.setVisible(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
