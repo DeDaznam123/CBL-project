@@ -140,7 +140,7 @@ public class Player {
         return shortestDistance;
     }
 
-    public void moveForward() {
+    public static void moveForward() {
         double newPosX = x + Math.cos(orientation) * 5;
         double newPosY = y + Math.sin(orientation) * 5;
 
@@ -150,7 +150,7 @@ public class Player {
         }
     }
 
-    public void moveBackward() {
+    public static void moveBackward() {
         double newPosX = x - Math.cos(orientation) * 5;
         double newPosY = y - Math.sin(orientation) * 5;
 
@@ -160,14 +160,14 @@ public class Player {
         }
     }
 
-    public void rotateLeft() {
+    public static void rotateLeft() {
         orientation += ROTATION_INCREMENT;
         if (orientation >= (2 * PI)) {
             orientation = 0;
         }
     }
 
-    public void rotateRight() {
+    public static void rotateRight() {
         orientation -= ROTATION_INCREMENT;
         if (orientation < 0) {
             orientation = 2 * PI;
