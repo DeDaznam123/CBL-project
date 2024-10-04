@@ -8,7 +8,7 @@ public class Player {
     private static final int FOV = 60;
 
     // Depth of field (Largest side of the grid.)
-    private static final int DOF = 5;
+    private static final int DOF = 15;
     //(Grid.getHeight() < Grid.getWidth()) ? Grid.getWidth() : Grid.getHeight();
 
     // How much to rotate the player.
@@ -30,35 +30,7 @@ public class Player {
         orientation = 0;
     }
 
-    // Cast one ray from the player.
-    public static double castRay(double i) {
-
-        // Store the distance of the closest collision to the player (vertical vs horizontal).
-        double shortestDistance = 0;
-
-        // Position and angle of the ray.
-        double xIntercept = x;
-        double yIntercept = y;
-        double rayAngle = orientation + (i * App.ANGLE_INCREMENT);
-
-        // Ammount to offset the position of the ray for faster calculation of next grid cell.
-        double dy = 0;
-        double dx = 0;
-
-        int depth = 0;
-        double tan;
-
-        // Avoid values where tan is Undefined and avoid division by 0
-        if (rayAngle == PI / 2) {                   tan = Double.MAX_VALUE;   } 
-        else if (rayAngle == 3 * PI / 2) {          tan = Double.MAX_VALUE;   }
-        else if (rayAngle == 0 || rayAngle == PI) { tan = Double.MIN_VALUE;   }
-        else {                                      tan = Math.tan(rayAngle); }
-        System.out.println(tan);
-
-        // ======================
-        // Check horizontal Lines
-        // ======================
-
+    public static double castForHorizontalDistance(double rayAngle, double yIntercept, double dy, double xIntercept, double dx, double tan, double depth) {
         // If the ray is facing up.
         if (rayAngle > PI) {
             yIntercept = (((int) y >> 8) << 8) - 1; // -1 ensures that the intercept belongs to cell above.
@@ -78,13 +50,15 @@ public class Player {
             depth = DOF;
         }
 
+        System.out.println("Before DOF");
+
         // Keep adding the delta until wall is found
         while (depth < DOF) {
             depth++;
-            
+            System.out.println("After DOF");
+
             if (Grid.getGrid()[(int) xIntercept >> 8][(int) yIntercept >> 8] == 1) {
                 depth = DOF;
-                shortestDistance = Math.abs((x - xIntercept) / Math.cos(rayAngle));
                 break;
             }
 
@@ -92,12 +66,10 @@ public class Player {
             yIntercept += dy;
         }
 
-        // ====================
-        // Check vertical Lines
-        // ====================
+        return Math.abs((x - xIntercept) / Math.cos(rayAngle));
+    }
 
-        depth = 0;
-
+    public static double castForVerticalDistance(double rayAngle, double yIntercept, double dy, double xIntercept, double dx, double tan, double depth) {
         // If the ray is facing right.
         if (rayAngle < (PI / 2) || rayAngle > ((3 * PI) / 2)) {
             xIntercept = ((int) x >> 8) << 8 - 1;
@@ -124,11 +96,6 @@ public class Player {
 
             if (Grid.getGrid()[(int) xIntercept >> 8][(int) yIntercept >> 8] == 1) {
                 depth = DOF;
-
-                if (shortestDistance > Math.abs((x - xIntercept) / Math.cos(rayAngle))) {
-                    shortestDistance = Math.abs((x - xIntercept) / Math.cos(rayAngle));
-                }
-
                 break;
             }
 
@@ -136,8 +103,37 @@ public class Player {
             yIntercept += dy;
         }
 
-        System.out.println(shortestDistance);
-        return shortestDistance;
+        return Math.abs((x - xIntercept) / Math.cos(rayAngle));
+    }
+
+
+    // Cast one ray from the player.
+    public static double castRay(double i) {
+
+        // Position and angle of the ray.
+        double xIntercept = x;
+        double yIntercept = y;
+        double rayAngle = orientation + (i * App.ANGLE_INCREMENT);
+        System.out.println("RayAngle: " + rayAngle);
+
+        double tan;
+
+        // Avoid values where tan is Undefined and avoid division by 0
+        if (rayAngle == PI / 2 || rayAngle == 3 * PI / 2) {
+            tan = Double.MAX_VALUE;
+        } else if (rayAngle == 0 || rayAngle == PI) {
+            tan = Double.MIN_VALUE;
+        } else {
+            tan = Math.tan(rayAngle);
+        }
+        System.out.println("Tan: " + tan);
+
+        // Check horizontal Lines and vertical lines
+        double distH = castForHorizontalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
+        double distV = castForVerticalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
+
+        System.out.println("Distances (h, v): (" + distH + ", " + distV + ")");
+        return Math.min(distH, distV);
     }
 
     public static void moveForward() {

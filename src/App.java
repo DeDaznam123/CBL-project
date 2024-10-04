@@ -8,13 +8,14 @@ import javax.swing.*;
 public class App extends JPanel {
 
     // Dimensions of the Projection Plane (pixels).
-    public static final int PLANE_WIDTH  = 320;
-    public static final int PLANE_HEIGHT  = 200;
+    public static final int WIDTH  = 320;
+    public static final int HEIGHT  = 200;
 
     // planeCenter / tan(FOV / 2)
     public static final int DISTANCE_PLAYER_TO_PLANE = 277;
 
-    public static final double ANGLE_INCREMENT = Player.getFOV() / PLANE_WIDTH; 
+    // How much to rotate after each ray cast.
+    public static final double ANGLE_INCREMENT = Player.getFOV() / WIDTH; 
 
     // Keybindings.
     private Action w = new AbstractAction("w") {
@@ -69,21 +70,19 @@ public class App extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         performRayCastingAndDrawWalls(g2d);
-
     }
     
     public void performRayCastingAndDrawWalls(Graphics2D g2d) {
-
-        //g2d.setBackground(Color.WHITE);
-        //g2d.clearRect(0, 0, WIDTH, HEIGHT);
-
         double distance;
         double projectedHeight;
+        g2d.setColor(Color.RED);
 
-        for (int x = 0; x < PLANE_WIDTH; x++) {
-            distance = Player.castRay(x);
+        for (int i = 0; i < WIDTH; i++) {
+            System.out.println(i);
+            distance = Player.castRay(i);
             projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
-            g2d.fillRect(x, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
+            System.out.println("Projected Height: " + projectedHeight);
+            g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
         }
     }
 
@@ -92,8 +91,6 @@ public class App extends JPanel {
             App app = new App();
 
             JFrame frame = new JFrame("DOOM-Like");
-            frame.setLayout(new FlowLayout());
-            frame.setSize(WIDTH, HEIGHT);
 
             frame.add(app);
             frame.pack();
