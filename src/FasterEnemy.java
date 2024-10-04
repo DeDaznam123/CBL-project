@@ -1,3 +1,4 @@
+
 public class FasterEnemy extends Enemy {
     
     public FasterEnemy(int[][] grid) {

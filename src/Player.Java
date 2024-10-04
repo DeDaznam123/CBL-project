@@ -30,118 +30,113 @@ public class Player {
         orientation = 0;
     }
 
-    public static double[] rayCast() {
-        double[] distances = new double[ProjectionPlane.PLANE_WIDTH];
-
-        for (double i = 0; i < ProjectionPlane.PLANE_WIDTH; i += ProjectionPlane.getAngleIncrement()) {
-            distances[(int) (i / ProjectionPlane.getAngleIncrement())] = castRay(i);
-        }
-        
-        return distances;
-    }
-
     // Cast one ray from the player.
     public static double castRay(double i) {
 
-        // Will store the distance of the closest collision to the player (vertical vs horizontal).
-        double shortestDistance = 10000000;
+        // Store the distance of the closest collision to the player (vertical vs horizontal).
+        double shortestDistance = 0;
 
         // Position and angle of the ray.
-        double rayX = 0;
-        double rayY = 0;
-        double rayAngle = orientation + i;
+        double xIntercept = x;
+        double yIntercept = y;
+        double rayAngle = orientation + (i * App.ANGLE_INCREMENT);
 
         // Ammount to offset the position of the ray for faster calculation of next grid cell.
         double dy = 0;
         double dx = 0;
 
-        double arctan = Math.tan(rayAngle + PI / 2);
         int depth = 0;
+        double tan;
+
+        // Avoid values where tan is Undefined and avoid division by 0
+        if (rayAngle == PI / 2) {                   tan = Double.MAX_VALUE;   } 
+        else if (rayAngle == 3 * PI / 2) {          tan = Double.MAX_VALUE;   }
+        else if (rayAngle == 0 || rayAngle == PI) { tan = Double.MIN_VALUE;   }
+        else {                                      tan = Math.tan(rayAngle); }
+        System.out.println(tan);
 
         // ======================
         // Check horizontal Lines
         // ======================
 
-        System.out.println(arctan);
-
         // If the ray is facing up.
         if (rayAngle > PI) {
-            rayY = (((int) y / 64) * 64) - 0.0001;
-            rayX = (y - rayY) * arctan + x;
-            dx = -dy * arctan;
+            yIntercept = (((int) y >> 8) << 8) - 1; // -1 ensures that the intercept belongs to cell above.
             dy = -64;
-            
         // If the ray is facing down.
         } else if (rayAngle < PI) {
-            rayY = (((int) y / 64) * 64) + 64;
-            rayX = (y - rayY) * arctan + x;
-            dx = -dy * arctan;
-            dy = 64;
-            
-        } else if (rayAngle == 0 || rayAngle == PI) {
-            rayX = x;
-            rayY = y;
-            depth = 8;
+            yIntercept = (((int) y >> 8) << 8) + 64;
+            dy = 64; 
+        }
+
+        xIntercept = x + (y - yIntercept) / tan;
+        dx = 64 / tan;
+
+        if (rayAngle == 0 || rayAngle == PI) {
+            xIntercept = x;
+            yIntercept = y;
+            depth = DOF;
         }
 
         // Keep adding the delta until wall is found
         while (depth < DOF) {
-            int mx = (int) rayX / 64;
-            int my = (int) rayY / 64;
-            int mp = my * 5 + mx;
-
-            // Hit wall.
-            if (mp > 0 && mp < 25 && Grid.getGrid()[mx][my] == 1) {
-                shortestDistance = Math.sqrt(rayX * rayX + rayY * rayY);
-                depth = 8;
-                System.out.println(shortestDistance);
+            depth++;
+            
+            if (Grid.getGrid()[(int) xIntercept >> 8][(int) yIntercept >> 8] == 1) {
+                depth = DOF;
+                shortestDistance = Math.abs((x - xIntercept) / Math.cos(rayAngle));
                 break;
             }
-            
-            // Next boundary.
-            rayX += dx;
-            rayY += dy;
-            depth++;
+
+            xIntercept += dx;
+            yIntercept += dy;
         }
 
         // ====================
         // Check vertical Lines
         // ====================
 
-        double ntan = -Math.tan(rayAngle);
         depth = 0;
 
         // If the ray is facing right.
         if (rayAngle < (PI / 2) || rayAngle > ((3 * PI) / 2)) {
-            rayX = ((int) x / 64) * 64 - 1;
-            dx = -64;
-            
-        // If the ray is facing right.
-        } else if (rayAngle > (PI / 2) && rayAngle < ((3 * PI) / 2)) {
-            rayX = ((int) x / 64) * 64 + 64;
+            xIntercept = ((int) x >> 8) << 8 - 1;
             dx = 64;
+            
+        // If the ray is facing left.
+        } else if (rayAngle > (PI / 2) && rayAngle < ((3 * PI) / 2)) {
+            yIntercept = ((int) x >> 8) << 8 + 64;
+            dx = -64;
         }
 
-        rayY = (x - rayX) * ntan + y;
-        dy = -dx * ntan;
+        yIntercept = (x - xIntercept) / tan;
+        dy = 64 * tan;
 
+        if (rayAngle == PI / 2 || rayAngle == 3 * PI / 2) {
+            xIntercept = x;
+            yIntercept = y;
+            depth = DOF;
+        }
+        
         // Keep adding the delta until wall is found
         while (depth < DOF) {
-            int mx = (int) rayX / 64;
-            int my = (int) rayY / 64;
-            int mp = my * 5 + mx;
+            depth++;
 
-            if (mp > 0 && mp < 25 && (Grid.getGrid()[mx][my] == 1) && (shortestDistance < Math.sqrt(rayX * rayX + rayY * rayY))) {
-                shortestDistance = Math.sqrt(rayX * rayX + rayY * rayY);
-                System.out.println("Shortest Distance: " + shortestDistance);
+            if (Grid.getGrid()[(int) xIntercept >> 8][(int) yIntercept >> 8] == 1) {
+                depth = DOF;
+
+                if (shortestDistance > Math.abs((x - xIntercept) / Math.cos(rayAngle))) {
+                    shortestDistance = Math.abs((x - xIntercept) / Math.cos(rayAngle));
+                }
+
                 break;
             }
 
-            rayX += dx;
-            rayY += dy;
-            depth++;
+            xIntercept += dx;
+            yIntercept += dy;
         }
 
+        System.out.println(shortestDistance);
         return shortestDistance;
     }
 
