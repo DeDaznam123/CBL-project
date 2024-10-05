@@ -115,7 +115,7 @@ public class Player {
     }
 
     // Cast one ray from the player.
-    public double castRay(double i) {
+    public double[] castRay(double i) {
 
         // Position and angle of the ray.
         double xIntercept = 0;
@@ -141,8 +141,7 @@ public class Player {
         double distH = castForHorizontalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
         double distV = castForVerticalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
 
-        // System.out.println("Distances (h, v): (" + distH + ", " + distV + ")");
-        return Math.min(distH, distV);
+        return new double[] {distH, distV};
     }
 
     public void moveForward() {
