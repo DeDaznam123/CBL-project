@@ -7,14 +7,15 @@ import javax.swing.*;
 public class App extends JPanel implements Runnable {
 
     // Dimensions of the Projection Plane (pixels).
-    public static final int WIDTH  = 1024;
-    public static final int HEIGHT  = 700;
+    public static final int WIDTH  = 1920;
+    public static final int HEIGHT  = 1200;
+    private static final double PI = Math.PI;
 
     // planeCenter / tan(FOV / 2)
     public static final int DISTANCE_PLAYER_TO_PLANE = 887;
 
     // How much to rotate after each ray cast.
-    public static final double ANGLE_INCREMENT = (double) Player.getFOV() / (double) WIDTH; 
+    public static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
 
     public Player player = new Player(100, 100);
     public int FPS = 60;   
@@ -70,35 +71,42 @@ public class App extends JPanel implements Runnable {
         Graphics2D g2d = (Graphics2D) g;
         double distance;
         double projectedHeight;
-        g2d.setColor(Color.RED);
+        
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, WIDTH, HEIGHT);
+        g2d.setColor(Color.LIGHT_GRAY);
+        for (int i = 0; i < WIDTH; i++) {
+            distance = player.castRay(i);
 
+            // double x1 = player.getX() + distance * Math.cos(player.getOrientation() + (i * ANGLE_INCREMENT));
+            // double y1 = player.getY() + distance * Math.sin(player.getOrientation() + (i * ANGLE_INCREMENT));
+            double rayAngle = player.getOrientation() + (i * App.ANGLE_INCREMENT);
+            rayAngle = (rayAngle + 2 * PI) % (2 * PI); // Normalize
+
+            double x1 = player.getX() + distance * Math.cos(rayAngle);
+            double y1 = player.getY() + distance * Math.sin(rayAngle);
+
+            //g.drawLine((int)player.getX(), (int)player.getY(), (int)x1, (int)y1);
+            
+            projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
+            g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
+
+        }
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(WIDTH-151, 49, 101, 101);
         for (int i = 0; i < Grid.getWidth(); i++){
             for (int j = 0; j < Grid.getHeight(); j++) {
                 if (Grid.getGrid()[i][j] == 1) {
                     g2d.setColor(Color.BLACK);
-                    g2d.fillRect(i * Grid.getCellSize(), j * Grid.getCellSize(), Grid.getCellSize()-1, Grid.getCellSize()-1);
+                    g2d.fillRect(WIDTH-150+i * 10, 50+j * 10, 9, 9);
                 }else{
                     g2d.setColor(Color.WHITE);
-                    g2d.fillRect(i * Grid.getCellSize(), j * Grid.getCellSize(), Grid.getCellSize(), Grid.getCellSize());
+                    g2d.fillRect(WIDTH-150+i * 10, 50+j * 10, 10, 10);
                 }
             }
         }
+        g2d.fillRect((int) (player.getX()/6.4)+WIDTH-150, (int) (player.getY()/6.4)+50, 3, 3);
 
-        g2d.setColor(Color.RED);
-        g2d.fillRect((int) player.getX(), (int) player.getY(), 10, 10);
-
-        for (int i = 0; i < WIDTH; i++) {
-            distance = player.castRay(i);
-
-            double x1 = player.getX() + distance * Math.cos(player.getOrientation() + (i * ANGLE_INCREMENT));
-            double y1 = player.getY() + distance * Math.sin(player.getOrientation() + i * (ANGLE_INCREMENT));
-            g.drawLine((int)player.getX(), (int)player.getY(), (int)x1, (int)y1);
-
-            //projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
-            //System.out.println("Projected Height: " + projectedHeight);
-            //g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
-
-        }
     }
 
     public static void main(String[] args) throws Exception {

@@ -8,8 +8,7 @@ public class Player {
     private static final int FOV = 60;
 
     // Depth of field (Largest side of the grid.)
-    private static final int DOF = 100;
-    //(Grid.getHeight() < Grid.getWidth()) ? Grid.getWidth() : Grid.getHeight();
+    private static final int DOF = (Grid.getHeight() < Grid.getWidth()) ? Grid.getWidth() : Grid.getHeight();
 
     // How much to rotate the player.
     private static final double ROTATION_INCREMENT = 0.07;
@@ -58,7 +57,7 @@ public class Player {
             int xIndex = (int) xIntercept >> 6;
             int yIndex = (int) yIntercept >> 6;
 
-            if(yIndex < Grid.getHeight()-1 && xIndex < Grid.getWidth()-1 && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex]==1){
+            if(yIndex < Grid.getHeight() && xIndex < Grid.getWidth() && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex]==1){
 
                 depth = DOF;
                 break;
@@ -81,14 +80,14 @@ public class Player {
             xIntercept = x - (x % 64) - 0.0001;
             yIntercept = (x - xIntercept) * nTan + y;
             dx = -64;
-            dy = -dy * nTan;
+            dy = -dx * nTan;
         }
         // If the ray is facing right.
         if (rayAngle < PI/2 || rayAngle > 3*PI/2){
             xIntercept = x - (x % 64) + 64;
-            xIntercept = (x - xIntercept) * nTan + y;
+            yIntercept = (x - xIntercept) * nTan + y;
             dx = 64;
-            dy = -dy * nTan;
+            dy = -dx * nTan;
         }
         // Up / Down.
         if (rayAngle == 0 || rayAngle == PI){
@@ -122,6 +121,7 @@ public class Player {
         double xIntercept = 0;
         double yIntercept = 0;
         double rayAngle = orientation + (i * App.ANGLE_INCREMENT);
+        rayAngle = (rayAngle + 2 * PI) % (2 * PI);
         
         // System.out.println("RayAngle: " + rayAngle);
         double tan;
@@ -146,8 +146,8 @@ public class Player {
     }
 
     public void moveForward() {
-        double newPosX = x + Math.cos(orientation) * 5;
-        double newPosY = y + Math.sin(orientation) * 5;
+        double newPosX = x + Math.cos(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
+        double newPosY = y + Math.sin(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
@@ -155,23 +155,23 @@ public class Player {
     }
 
     public void moveBackward() {
-        double newPosX = x - Math.cos(orientation) * 5;
-        double newPosY = y - Math.sin(orientation) * 5;
+        double newPosX = x - Math.cos(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
+        double newPosY = y - Math.sin(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
         }
     }
 
-    public void rotateLeft() {
-        orientation -= ROTATION_INCREMENT;
+    public void rotateRight() {
+        orientation += ROTATION_INCREMENT;
         if (orientation > (2 * PI)) {
             orientation -= 2 * PI;
         }
     }
 
-    public void rotateRight() {
-        orientation += ROTATION_INCREMENT;
+    public void rotateLeft() {
+        orientation -= ROTATION_INCREMENT;
         if (orientation < 0) {
             orientation += 2 * PI;
         }
