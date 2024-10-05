@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 /**
@@ -12,10 +11,10 @@ public class App extends JPanel implements Runnable {
     public static final int HEIGHT  = 700;
 
     // planeCenter / tan(FOV / 2)
-    public static final int DISTANCE_PLAYER_TO_PLANE = 277;
+    public static final int DISTANCE_PLAYER_TO_PLANE = 887;
 
     // How much to rotate after each ray cast.
-    public static final double ANGLE_INCREMENT = (double)Player.getFOV() / (double)WIDTH; 
+    public static final double ANGLE_INCREMENT = (double) Player.getFOV() / (double) WIDTH; 
 
     public Player player = new Player(100, 100);
     public int FPS = 60;   
@@ -28,10 +27,8 @@ public class App extends JPanel implements Runnable {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.addKeyListener(keyHandler);
         this.setFocusable(true);
-
-      
+        startGame();
     }
-
 
     public void startGame(){
         gameThread = new Thread(this);
@@ -65,6 +62,7 @@ public class App extends JPanel implements Runnable {
         }
 
     }
+    
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -73,7 +71,8 @@ public class App extends JPanel implements Runnable {
         double distance;
         double projectedHeight;
         g2d.setColor(Color.RED);
-        for (int i =0;i<Grid.getWidth();i++){
+
+        for (int i = 0; i < Grid.getWidth(); i++){
             for (int j = 0; j < Grid.getHeight(); j++) {
                 if (Grid.getGrid()[i][j] == 1) {
                     g2d.setColor(Color.BLACK);
@@ -84,13 +83,17 @@ public class App extends JPanel implements Runnable {
                 }
             }
         }
+
         g2d.setColor(Color.RED);
         g2d.fillRect((int) player.getX(), (int) player.getY(), 10, 10);
+
         for (int i = 0; i < WIDTH; i++) {
             distance = player.castRay(i);
-            // double x1 = player.getX() + distance*Math.cos(player.getOrientation());
-            // double y1 = player.getY() + distance*Math.sin(player.getOrientation());
-            // g.drawLine((int)player.getX(), (int)player.getY(), (int)x1, (int)y1);
+
+            double x1 = player.getX() + distance * Math.cos(player.getOrientation() + (i * ANGLE_INCREMENT));
+            double y1 = player.getY() + distance * Math.sin(player.getOrientation() + i * (ANGLE_INCREMENT));
+            g.drawLine((int)player.getX(), (int)player.getY(), (int)x1, (int)y1);
+
             //projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
             //System.out.println("Projected Height: " + projectedHeight);
             //g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
@@ -101,13 +104,10 @@ public class App extends JPanel implements Runnable {
     public static void main(String[] args) throws Exception {
         SwingUtilities.invokeLater(() -> {
             App app = new App();
-            app.startGame();
+            
             JFrame frame = new JFrame("DOOM-Like");
-            
             frame.add(app);
-            
             frame.pack();
-
             frame.setLocationRelativeTo(null);
             frame.setResizable(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
