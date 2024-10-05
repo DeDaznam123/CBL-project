@@ -9,7 +9,7 @@ public class App extends JPanel implements Runnable {
     // Dimensions of the Projection Plane (pixels).
     public static final int WIDTH  = 1920;
     public static final int HEIGHT  = 1200;
-    private static final double PI = Math.PI;
+    
 
     // planeCenter / tan(FOV / 2)
     public static final int DISTANCE_PLAYER_TO_PLANE = 887;
@@ -18,6 +18,7 @@ public class App extends JPanel implements Runnable {
     public static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
 
     public Player player = new Player(100, 100);
+    public Enemy enemy = new Enemy(player);
     public int FPS = 60;   
     // Keybindings.
     
@@ -39,6 +40,7 @@ public class App extends JPanel implements Runnable {
     public void run(){
         double timePerFrame = 1000000000 / FPS;
         double nextFrameTime = System.nanoTime() + timePerFrame;
+        enemy.spawn();
         while(gameThread != null){
             if(System.nanoTime() > nextFrameTime){
                 nextFrameTime = System.nanoTime() + timePerFrame;
@@ -67,14 +69,20 @@ public class App extends JPanel implements Runnable {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         Graphics2D g2d = (Graphics2D) g;
+
+        drawMap(g2d);
+        drawMiniMap(g2d);
+        drawEnemy(g2d, enemy);
+
+    }
+
+    public void drawMap(Graphics2D g2d){
         double distance;
         double projectedHeight;
         
         g2d.setColor(Color.BLACK);
         g2d.fillRect(0, 0, WIDTH, HEIGHT);
-        
         for (int i = 0; i < WIDTH; i++) {
             double[] distanceTypes = player.castRay(i);
             if(distanceTypes[0] < distanceTypes[1]){
@@ -84,7 +92,6 @@ public class App extends JPanel implements Runnable {
                 distance = distanceTypes[1];
                 g2d.setColor(new Color(100, 100, 100));
             }
-
             // double x1 = player.getX() + distance/6.4 * Math.cos(player.getOrientation() + (i * ANGLE_INCREMENT));
             // double y1 = player.getY() + distance/6.4 * Math.sin(player.getOrientation() + (i * ANGLE_INCREMENT));
             // double rayAngle = player.getOrientation() + (i * App.ANGLE_INCREMENT);
@@ -97,6 +104,9 @@ public class App extends JPanel implements Runnable {
             // g.drawLine((int)(player.getX()/6.4)+WIDTH-150, (int) (player.getY()/6.4)+50, (int)x1, (int)y1);
 
         }
+    }
+
+    public void drawMiniMap(Graphics2D g2d){
         g2d.setColor(Color.WHITE);
         g2d.fillRect(WIDTH-151, 49, 101, 101);
         for (int i = 0; i < Grid.getWidth(); i++){
@@ -111,6 +121,22 @@ public class App extends JPanel implements Runnable {
             }
         }
         g2d.fillRect((int) (player.getX()/6.4)+(int)(WIDTH-Grid.getWidth()*10-50), (int) (player.getY()/6.4)+50, 3, 3);
+    }
+
+    public void drawEnemy(Graphics2D g2d, Enemy enemy){
+        // double enemyDistance = Math.sqrt(Math.pow(player.getX()-enemy.getX(), 2) + Math.pow(player.getY()-enemy.getY(), 2));
+        // double projectedEnemyHeight = 64 / enemyDistance * DISTANCE_PLAYER_TO_PLANE;
+        // g2d.fillRect(,(int) (HEIGHT - projectedEnemyHeight) / 2,10, (int) projectedEnemyHeight);
+        double angle = player.getOrientation()+(WIDTH * ANGLE_INCREMENT)/2;
+        angle = (angle + 2 * Math.PI) % (2 * Math.PI);
+        double cos = Math.cos(angle), sin = Math.sin(angle);
+        double a = (enemy.getX()-player.getX())*sin+(enemy.getY()-player.getY())*cos;
+        double b = (enemy.getX()-player.getX())*cos-(enemy.getY()-player.getY())*sin; 
+        double screenX = a, screenY=b;
+        screenX = (screenX*DISTANCE_PLAYER_TO_PLANE/screenY)+WIDTH/2;
+        screenY = (DISTANCE_PLAYER_TO_PLANE/screenY)+HEIGHT/2;
+        g2d.setColor(Color.RED);
+        g2d.fillRect((int)screenX, (int)screenY, 40, 40);
 
     }
 

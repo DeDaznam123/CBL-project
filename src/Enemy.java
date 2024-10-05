@@ -5,29 +5,33 @@ public class Enemy {
 
     protected int speed;
     protected int health;
-    protected int[] position;
+    protected double x,y;
     protected int score;
-    protected int[][] grid;
+    protected Player player;
 
-    public Enemy(int[][] grid){ 
+    public Enemy(Player player){ 
         this.speed = 3;
         this.score = 50;
-        this.grid = grid;
-        this.position = new int[2];
+        this.player = player;
     }
 
-    public void move(Player player){
-        if (player.position[0] > this.position[0]) {
-            this.position[0] += this.speed;
+    public void move(){
+        double newX=this.x,newY=this.y;
+        if (player.getX() > this.x) {
+            newX += this.speed;
         } 
-        if (player.position[0] < this.position[0]) {
-            this.position[0] -= this.speed;
+        if (player.getX() < this.x) {
+            newX -= this.speed;
         } 
-        if (player.position[1] > this.position[1]) {
-            this.position[1] += this.speed;
+        if (player.getY() > this.y) {
+            newY += this.speed;
         } 
-        if (player.position[1] < this.position[1]) {
-            this.position[1] -= this.speed;
+        if (player.getY() < this.y) {
+            newY -= this.speed;
+        }
+        if(!Grid.isInWall(newX, newY)){
+            this.x = newX;
+            this.y = newY;
         }
     }
 
@@ -42,13 +46,19 @@ public class Enemy {
         Random rand = new Random();
         int p;
         do {
-            p = rand.nextInt(grid.length * grid[0].length);
-            position[0] = p / grid[0].length * 64;
-            position[1] = p % grid[0].length * 64;
-        } while (grid[position[0]][position[1]] != 0);
+            p = rand.nextInt(Grid.getWidth() * Grid.getHeight());
+            x = p / Grid.getWidth() * 64;
+            y = p % Grid.getHeight() * 64;
+        } while (Grid.isInWall(x, y));
         health = 100;
     }
-
+    public double getX(){
+        return this.x;
+    }
+    public double getY(){
+        return this.y;
+    }
+    
    
 
 }
