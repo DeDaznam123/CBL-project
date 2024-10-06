@@ -11,7 +11,7 @@ public class App extends JPanel implements Runnable {
     public static final int HEIGHT  = 1080;
     
     // planeCenter / tan(FOV / 2)
-    public static final int DISTANCE_PLAYER_TO_PLANE = 887;
+    public static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 / Math.tan(Math.toRadians(Player.getFOV()) / 2));
 
     // How much to rotate after each ray cast.
     public static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
@@ -93,8 +93,11 @@ public class App extends JPanel implements Runnable {
         double distance;
         double projectedHeight;
         
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(0, 0, WIDTH, HEIGHT);
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(0, 0, WIDTH, HEIGHT / 2);
+        g2d.setColor(Color.darkGray);
+        g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
+        
         for (int i = 0; i < WIDTH; i++) {
             double[] distanceTypes = player.castRay(i);
             if (distanceTypes[0] < distanceTypes[1]) {

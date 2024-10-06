@@ -135,8 +135,6 @@ public class Player {
         
         tan = Math.tan(rayAngle);
 
-        //System.out.println("Tan: " + tan);
-
         // Check horizontal Lines and vertical lines
         double distH = castForHorizontalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
         double distV = castForVerticalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
