@@ -11,7 +11,7 @@ public class Player {
     private static final int DOF = (Grid.getHeight() < Grid.getWidth()) ? Grid.getWidth() : Grid.getHeight();
 
     // How much to rotate the player.
-    private static final double ROTATION_INCREMENT = 0.07;
+    private static final double ROTATION_INCREMENT = 0.05;
 
     // Value of pi.
     private static final double PI = Math.PI;

@@ -8,9 +8,8 @@ public class App extends JPanel implements Runnable {
 
     // Dimensions of the Projection Plane (pixels).
     public static final int WIDTH  = 1920;
-    public static final int HEIGHT  = 1200;
+    public static final int HEIGHT  = 1080;
     
-
     // planeCenter / tan(FOV / 2)
     public static final int DISTANCE_PLAYER_TO_PLANE = 887;
 
@@ -19,12 +18,16 @@ public class App extends JPanel implements Runnable {
 
     public Player player = new Player(100, 100);
     public Enemy enemy = new Enemy(player);
-    public int FPS = 60;   
-    // Keybindings.
+    public static final int FPS = 60;
     
+    // Keybindings.
     KeyHandler keyHandler = new KeyHandler();
+
     Thread gameThread;
 
+    /**
+     * App constructor.
+     */
     public App() {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.addKeyListener(keyHandler);
@@ -32,17 +35,21 @@ public class App extends JPanel implements Runnable {
         startGame();
     }
 
-    public void startGame(){
+    /**
+     * Start the thread attach Runnable App.
+     */
+    public void startGame() {
         gameThread = new Thread(this);
         gameThread.start();
     }
 
-    public void run(){
+    public void run() {
         double timePerFrame = 1000000000 / FPS;
         double nextFrameTime = System.nanoTime() + timePerFrame;
         enemy.spawn();
-        while(gameThread != null){
-            if(System.nanoTime() > nextFrameTime){
+
+        while (gameThread != null) {
+            if (System.nanoTime() > nextFrameTime) {
                 nextFrameTime = System.nanoTime() + timePerFrame;
                 update();
                 repaint();
@@ -50,20 +57,22 @@ public class App extends JPanel implements Runnable {
         }
     }
     
-    public void update(){
-        if(keyHandler.wPressed){
+    /**
+     * Updates the player's position.
+     */
+    public void update() {
+        if (keyHandler.wPressed) {
             player.moveForward();
         }
-        if(keyHandler.sPressed){
+        if (keyHandler.sPressed) {
             player.moveBackward();
         }
-        if(keyHandler.aPressed){
+        if (keyHandler.aPressed) {
             player.rotateLeft();
         }
-        if(keyHandler.dPressed){
+        if (keyHandler.dPressed) {
             player.rotateRight();
         }
-
     }
     
     @Override
@@ -74,10 +83,13 @@ public class App extends JPanel implements Runnable {
         drawMap(g2d);
         drawMiniMap(g2d);
         drawEnemy(g2d, enemy);
-
     }
 
-    public void drawMap(Graphics2D g2d){
+    /**
+     * Draws the 2D top down map.
+     * @param g2d Graphics2D.
+     */
+    public void drawMap(Graphics2D g2d) {
         double distance;
         double projectedHeight;
         
@@ -85,58 +97,81 @@ public class App extends JPanel implements Runnable {
         g2d.fillRect(0, 0, WIDTH, HEIGHT);
         for (int i = 0; i < WIDTH; i++) {
             double[] distanceTypes = player.castRay(i);
-            if(distanceTypes[0] < distanceTypes[1]){
+            if (distanceTypes[0] < distanceTypes[1]) {
                 distance = distanceTypes[0];
                 g2d.setColor(new Color(80, 80, 80));
-            }else{
+            } else {
                 distance = distanceTypes[1];
                 g2d.setColor(new Color(100, 100, 100));
             }
-            // double x1 = player.getX() + distance/6.4 * Math.cos(player.getOrientation() + (i * ANGLE_INCREMENT));
-            // double y1 = player.getY() + distance/6.4 * Math.sin(player.getOrientation() + (i * ANGLE_INCREMENT));
+            // double x1 = player.getX() + distance/6.4 * 
+            // Math.cos(player.getOrientation() + (i * ANGLE_INCREMENT));
+
+            // double y1 = player.getY() + distance/6.4 * 
+            //Math.sin(player.getOrientation() + (i * ANGLE_INCREMENT));
+
             // double rayAngle = player.getOrientation() + (i * App.ANGLE_INCREMENT);
             // rayAngle = (rayAngle + 2 * PI) % (2 * PI); 
 
             // double x1 = player.getX() + distance * Math.cos(rayAngle);
             // double y1 = player.getY() + distance * Math.sin(rayAngle);
+
             projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
             g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
-            // g.drawLine((int)(player.getX()/6.4)+WIDTH-150, (int) (player.getY()/6.4)+50, (int)x1, (int)y1);
+
+            // g.drawLine((int)(player.getX()/6.4)+WIDTH-150, 
+            // (int) (player.getY()/6.4)+50, (int)x1, (int)y1);
 
         }
     }
 
-    public void drawMiniMap(Graphics2D g2d){
+    /**
+     * Draws mini map.
+     * @param g2d Graphics2D.
+     */
+    public void drawMiniMap(Graphics2D g2d) {
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(WIDTH-151, 49, 101, 101);
-        for (int i = 0; i < Grid.getWidth(); i++){
+        g2d.fillRect(WIDTH - 151, 49, 101, 101);
+        
+        for (int i = 0; i < Grid.getWidth(); i++) {
             for (int j = 0; j < Grid.getHeight(); j++) {
                 if (Grid.getGrid()[i][j] == 1) {
                     g2d.setColor(Color.BLACK);
-                    g2d.fillRect((int)(WIDTH-Grid.getWidth()*10-50)+i * 10, 50+j * 10, 9, 9);
-                }else{
-                    g2d.setColor(Color.WHITE);
-                    g2d.fillRect((int)(WIDTH-Grid.getWidth()*10-50)+i * 10, 50+j * 10, 10, 10);
+                    g2d.fillRect((int) (WIDTH - Grid.getWidth() * 10 - 50) + i * 10,
+                        50 + j * 10, 9, 9);
+                } else {
+                    g2d.setColor(Color.WHITE); 
+                    g2d.fillRect((int) (WIDTH - Grid.getWidth() * 10 - 50) + i * 10,
+                        50 + j * 10, 10, 10);
                 }
             }
         }
-        g2d.fillRect((int) (player.getX()/6.4)+(int)(WIDTH-Grid.getWidth()*10-50), (int) (player.getY()/6.4)+50, 3, 3);
+        g2d.fillRect((int) (player.getX() / 6.4) + (int) (WIDTH - Grid.getWidth() * 10 - 50),
+            (int) (player.getY() / 6.4) + 50, 3, 3);
     }
 
-    public void drawEnemy(Graphics2D g2d, Enemy enemy){
-        // double enemyDistance = Math.sqrt(Math.pow(player.getX()-enemy.getX(), 2) + Math.pow(player.getY()-enemy.getY(), 2));
+    /**
+     * Draw one enemy.
+     * @param g2d Graphics2D.
+     * @param enemy Enemy to draw.
+     */
+    public void drawEnemy(Graphics2D g2d, Enemy enemy) {
+        // double enemyDistance = Math.sqrt(Math.pow(player.getX()-enemy.getX(), 2) 
+        // + Math.pow(player.getY()-enemy.getY(), 2));
         // double projectedEnemyHeight = 64 / enemyDistance * DISTANCE_PLAYER_TO_PLANE;
         // g2d.fillRect(,(int) (HEIGHT - projectedEnemyHeight) / 2,10, (int) projectedEnemyHeight);
-        double angle = player.getOrientation()+(WIDTH * ANGLE_INCREMENT)/2;
+        double angle = player.getOrientation() + (WIDTH * ANGLE_INCREMENT) / 2;
         angle = (angle + 2 * Math.PI) % (2 * Math.PI);
-        double cos = Math.cos(angle), sin = Math.sin(angle);
-        double a = (enemy.getX()-player.getX())*sin+(enemy.getY()-player.getY())*cos;
-        double b = (enemy.getX()-player.getX())*cos-(enemy.getY()-player.getY())*sin; 
-        double screenX = a, screenY=b;
-        screenX = (screenX*DISTANCE_PLAYER_TO_PLANE/screenY)+WIDTH/2;
-        screenY = (DISTANCE_PLAYER_TO_PLANE/screenY)+HEIGHT/2;
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        double a = (enemy.getX() - player.getX()) * sin + (enemy.getY() - player.getY()) * cos;
+        double b = (enemy.getX() - player.getX()) * cos - (enemy.getY() - player.getY()) * sin;
+        double screenX = a;
+        double screenY = b;
+        screenX = (screenX * DISTANCE_PLAYER_TO_PLANE / screenY) + WIDTH / 2;
+        screenY = (DISTANCE_PLAYER_TO_PLANE / screenY) + HEIGHT / 2;
         g2d.setColor(Color.RED);
-        g2d.fillRect((int)screenX, (int)screenY, 40, 40);
+        g2d.fillRect((int) screenX, (int) screenY, 40, 40);
 
     }
 

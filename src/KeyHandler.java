@@ -1,40 +1,56 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+/**
+ * Handles the keyboard input from the player.
+ */
 public class KeyHandler implements KeyListener {
-    public boolean wPressed, sPressed, aPressed, dPressed;
+    public boolean wPressed;
+    public boolean sPressed;
+    public boolean aPressed;
+    public boolean dPressed;
+
     @Override
     public void keyPressed(KeyEvent arg0) {
         int key = arg0.getKeyCode();
-        if(key == KeyEvent.VK_W){
-            wPressed = true;
-        }
-        if(key == KeyEvent.VK_S){
-            sPressed = true;
-        }
-        if(key == KeyEvent.VK_A){
-            aPressed = true;
-        }
-        if(key == KeyEvent.VK_D){
-            dPressed = true;
-        }
 
+        switch (key) {
+            case KeyEvent.VK_W:
+                wPressed = true;
+                break;
+            case KeyEvent.VK_S:
+                sPressed = true;
+                break;
+            case KeyEvent.VK_A:
+                aPressed = true;
+                break;
+            case KeyEvent.VK_D:
+                dPressed = true;
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent arg0) {
         int key = arg0.getKeyCode();
-        if(key == KeyEvent.VK_W){
-            wPressed = false;
-        }
-        if(key == KeyEvent.VK_S){
-            sPressed = false;
-        }
-        if(key == KeyEvent.VK_A){
-            aPressed = false;
-        }
-        if(key == KeyEvent.VK_D){
-            dPressed = false;
+
+        switch (key) {
+            case KeyEvent.VK_W:
+                wPressed = false;
+                break;
+            case KeyEvent.VK_S:
+                sPressed = false;
+                break;
+            case KeyEvent.VK_A:
+                aPressed = false;
+                break;
+            case KeyEvent.VK_D:
+                dPressed = false;
+                break;
+            default:
+                break;
         }
     }
 
