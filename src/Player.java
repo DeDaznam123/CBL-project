@@ -22,11 +22,11 @@ public class Player {
 
     // Orientation in radians relative to absolute east (like unit circle).
     private static double orientation;
-    
+
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
-        orientation = 90;
+        orientation = 0;
     }
 
     public double castForHorizontalDistance(double rayAngle, double yIntercept, double dy, double xIntercept, double dx, double tan, double depth) {

@@ -11,7 +11,8 @@ public class App extends JPanel implements Runnable {
     public static final int HEIGHT  = 1080;
     
     // planeCenter / tan(FOV / 2)
-    public static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 / Math.tan(Math.toRadians(Player.getFOV()) / 2));
+    public static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 
+        / Math.tan(Math.toRadians(Player.getFOV()) / 2));
 
     // How much to rotate after each ray cast.
     public static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
@@ -98,8 +99,12 @@ public class App extends JPanel implements Runnable {
         g2d.setColor(Color.darkGray);
         g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
         
+        double[] distanceTypes;
+
         for (int i = 0; i < WIDTH; i++) {
-            double[] distanceTypes = player.castRay(i);
+
+            distanceTypes = player.castRay(i);
+
             if (distanceTypes[0] < distanceTypes[1]) {
                 distance = distanceTypes[0];
                 g2d.setColor(new Color(80, 80, 80));
@@ -121,7 +126,7 @@ public class App extends JPanel implements Runnable {
 
             projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
             g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
-
+                        
             // g.drawLine((int)(player.getX()/6.4)+WIDTH-150, 
             // (int) (player.getY()/6.4)+50, (int)x1, (int)y1);
 
@@ -134,23 +139,23 @@ public class App extends JPanel implements Runnable {
      */
     public void drawMiniMap(Graphics2D g2d) {
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(WIDTH - 151, 49, 101, 101);
+        g2d.fillRect(24, 24, 151, 151);
         
         for (int i = 0; i < Grid.getWidth(); i++) {
             for (int j = 0; j < Grid.getHeight(); j++) {
                 if (Grid.getGrid()[i][j] == 1) {
                     g2d.setColor(Color.BLACK);
-                    g2d.fillRect((int) (WIDTH - Grid.getWidth() * 10 - 50) + i * 10,
-                        50 + j * 10, 9, 9);
+                    g2d.fillRect(25 + i * 15,
+                        25 + j * 15, 14, 14);
                 } else {
                     g2d.setColor(Color.WHITE); 
-                    g2d.fillRect((int) (WIDTH - Grid.getWidth() * 10 - 50) + i * 10,
-                        50 + j * 10, 10, 10);
+                    g2d.fillRect(25 + i * 15,
+                        25 + j * 15, 15, 15);
                 }
             }
         }
-        g2d.fillRect((int) (player.getX() / 6.4) + (int) (WIDTH - Grid.getWidth() * 10 - 50),
-            (int) (player.getY() / 6.4) + 50, 3, 3);
+        g2d.fillRect((int) (player.getX() / 6.4 * 1.5) + 25,
+            (int) (player.getY() / 6.4 * 1.5) + 25, 3, 3);
     }
 
     /**
