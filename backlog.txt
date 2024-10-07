@@ -1,0 +1,28 @@
+1) Rendering walls sky and floor.
+How to demo: Start the application, you will be put in aa closed area surrounded by walls.
+Notes: An implementation of the raycasting algorithm is used to generatea 2.5D visual style.
+
+2) Movement and rotation with WASD keys.
+How to demo: Start the application, W and S keys move forwards and back respectively. A and D keys rotate camera left and right respectively.
+Notes: There should be proper collision detection with the walls.
+
+3) Enemies that follow the player.
+How to demo: Start the application, there will be sprites that follow the player around and deal damage over time when coming close.
+Notes: There will be multiple types of enemies (Faster, healthier, more damage/second)
+
+4) Game over screen when player's health reaches 0.
+How to demo: Start the application, wait for enemies to approach you and the health will drop to 0 eventually, leading to a game over screen.
+Notes: When game is over, the user can press the restart button and reset the score and health back to original and restart the game.
+
+5) Player can kill the enemies by aiming and shooting.
+How to demo: Start the application, and then move the crosshair on the center of the screen over an enemy, then shoot using the E key. The enemy should dissapear after being shot.
+Notes: Not implemented yet.
+
+6) Mini-map with real time tracking of player.
+How to demo: Start the aplication, there will be a top down 2D representation of the map on the top right of the screen.
+Notes: There will be a small square that represents the current location of the player on the map in real time.
+
+7) Score system.
+How to demo: Start the application, killing enemies should increase the score on the top right of the screen.
+Notes: The score increases by different amounts from killing different types of enemies.
+
