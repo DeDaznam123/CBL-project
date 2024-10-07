@@ -120,7 +120,7 @@ public class Player {
         // Position and angle of the ray.
         double xIntercept = 0;
         double yIntercept = 0;
-        double rayAngle = orientation + (i * App.ANGLE_INCREMENT);
+        double rayAngle = orientation + (i * App.getAngleIncrement());
         rayAngle = (rayAngle + 2 * PI) % (2 * PI);
         
         // System.out.println("RayAngle: " + rayAngle);
@@ -143,8 +143,8 @@ public class Player {
     }
 
     public void moveForward() {
-        double newPosX = x + Math.cos(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
-        double newPosY = y + Math.sin(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
+        double newPosX = x + Math.cos(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
+        double newPosY = y + Math.sin(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
@@ -152,8 +152,8 @@ public class Player {
     }
 
     public void moveBackward() {
-        double newPosX = x - Math.cos(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
-        double newPosY = y - Math.sin(orientation+((App.WIDTH * App.ANGLE_INCREMENT)/2)) * 5;
+        double newPosX = x - Math.cos(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
+        double newPosY = y - Math.sin(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;

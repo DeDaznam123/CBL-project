@@ -11,17 +11,24 @@ public class App extends JPanel implements Runnable {
     public static final int HEIGHT  = 1080;
     
     // planeCenter / tan(FOV / 2)
-    public static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 
+    private static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 
         / Math.tan(Math.toRadians(Player.getFOV()) / 2));
 
     // How much to rotate after each ray cast.
-    public static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
+    private static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
 
-    public Player player = new Player(100, 100);
-    public Enemy enemy = new Enemy(player);
-    public static final int FPS = 60;
+    private Player player = new Player(100, 100);
+    private Enemy enemy = new Enemy(player);
     
-    // Keybindings.
+    private static final int FPS = 60;
+    private long lastTime = System.nanoTime();   // To track time between frames
+
+    // Variables for FPS counter
+    private int frames = 0;
+    private long fpsTimer = System.nanoTime();  // Timer to reset every second
+    private int fps = 0;  // Store calculated FPS
+
+    // KeyHandler.
     KeyHandler keyHandler = new KeyHandler();
 
     Thread gameThread;
@@ -46,14 +53,34 @@ public class App extends JPanel implements Runnable {
 
     public void run() {
         double timePerFrame = 1000000000 / FPS;
-        double nextFrameTime = System.nanoTime() + timePerFrame;
         enemy.spawn();
 
         while (gameThread != null) {
-            if (System.nanoTime() > nextFrameTime) {
-                nextFrameTime = System.nanoTime() + timePerFrame;
-                update();
-                repaint();
+
+            // Calculate time elapsed since last frame.
+            long now = System.nanoTime();
+            long elapsed = now - lastTime;
+            lastTime = now;
+
+            //Update, render, increase frame count.
+            update();
+            repaint();
+            frames++;
+
+            // FPS Calculation every 1 second (1e9 ns).
+            if (now - fpsTimer >= 1e9) {
+                fps = frames;
+                frames = 0;
+                fpsTimer += 1e9;
+            }
+
+            // If frame finished early, sleep to reach FPS target.
+            if (elapsed < timePerFrame) {
+                try {
+                    Thread.sleep((long) ((timePerFrame - elapsed) / 1e6));  // Convert nanoseconds to milliseconds
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -84,6 +111,13 @@ public class App extends JPanel implements Runnable {
         drawMap(g2d);
         drawMiniMap(g2d);
         drawEnemy(g2d, enemy);
+        drawFPSCounter(g2d);
+    }
+
+    public void drawFPSCounter(Graphics g2d) {
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
+        g2d.drawString("FPS: " + fps, 185, 40);
     }
 
     /**
@@ -96,7 +130,7 @@ public class App extends JPanel implements Runnable {
         
         g2d.setColor(Color.BLUE);
         g2d.fillRect(0, 0, WIDTH, HEIGHT / 2);
-        g2d.setColor(Color.darkGray);
+        g2d.setColor(Color.DARK_GRAY);
         g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
         
         double[] distanceTypes;
@@ -121,13 +155,9 @@ public class App extends JPanel implements Runnable {
             // double rayAngle = player.getOrientation() + (i * App.ANGLE_INCREMENT);
             // rayAngle = (rayAngle + 2 * PI) % (2 * PI); 
 
-            // double x1 = player.getX() + distance * Math.cos(rayAngle);
-            // double y1 = player.getY() + distance * Math.sin(rayAngle);
-
             projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
             g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
                         
-            // g.drawLine((int)(player.getX()/6.4)+WIDTH-150, 
             // (int) (player.getY()/6.4)+50, (int)x1, (int)y1);
 
         }
@@ -147,10 +177,6 @@ public class App extends JPanel implements Runnable {
                     g2d.setColor(Color.BLACK);
                     g2d.fillRect(25 + i * 15,
                         25 + j * 15, 14, 14);
-                } else {
-                    g2d.setColor(Color.WHITE); 
-                    g2d.fillRect(25 + i * 15,
-                        25 + j * 15, 15, 15);
                 }
             }
         }
@@ -183,6 +209,10 @@ public class App extends JPanel implements Runnable {
 
     }
 
+    public static double getAngleIncrement() {
+        return ANGLE_INCREMENT;
+    }
+
     public static void main(String[] args) throws Exception {
         SwingUtilities.invokeLater(() -> {
             App app = new App();
@@ -194,6 +224,7 @@ public class App extends JPanel implements Runnable {
             frame.setResizable(true);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         });
     }
 
