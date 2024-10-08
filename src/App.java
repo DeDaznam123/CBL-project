@@ -119,6 +119,32 @@ public class App extends JPanel implements Runnable {
         drawMiniMap(g2d);
         drawEnemy(g2d, enemy);
         drawFPSCounter(g2d);
+        drawHealthBar(g2d);
+    }
+
+    /**
+     * Draws the health bar.draw
+     * @param g2d Graphics2D.
+     */
+    public void drawHealthBar(Graphics2D g2d) {
+        int health = player.getHealth();
+        
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("HP: " + health, 24, 200);
+        g2d.fillRect(25, 210, 158, 35);
+
+        // Change color based on health.
+        if (health < 25) {
+            g2d.setColor(Color.RED);
+        } else if (health < 50) {
+            g2d.setColor(Color.YELLOW);
+        } else if (health < 75) {
+            g2d.setColor(new Color(0, 255, 0));
+        } else {
+            g2d.setColor(new Color(0, 102, 0));
+        }
+
+        g2d.fillRect(29, 214, (int) ((double) health * 1.5), 27);
     }
 
     /**
@@ -201,22 +227,7 @@ public class App extends JPanel implements Runnable {
      * @param enemy Enemy to draw.
      */
     public void drawEnemy(Graphics2D g2d, Enemy enemy) {
-        // double enemyDistance = Math.sqrt(Math.pow(player.getX()-enemy.getX(), 2) 
-        // + Math.pow(player.getY()-enemy.getY(), 2));
-        // double projectedEnemyHeight = 64 / enemyDistance * DISTANCE_PLAYER_TO_PLANE;
-        // g2d.fillRect(,(int) (HEIGHT - projectedEnemyHeight) / 2,10, (int) projectedEnemyHeight);
-        double angle = player.getOrientation() + (WIDTH * ANGLE_INCREMENT) / 2;
-        angle = (angle + 2 * Math.PI) % (2 * Math.PI);
-        double cos = Math.cos(angle);
-        double sin = Math.sin(angle);
-        double a = (enemy.getX() - player.getX()) * sin + (enemy.getY() - player.getY()) * cos;
-        double b = (enemy.getX() - player.getX()) * cos - (enemy.getY() - player.getY()) * sin;
-        double screenX = a;
-        double screenY = b;
-        screenX = (screenX * DISTANCE_PLAYER_TO_PLANE / screenY) + WIDTH / 2;
-        screenY = (DISTANCE_PLAYER_TO_PLANE / screenY) + HEIGHT / 2;
-        g2d.setColor(Color.RED);
-        g2d.fillRect((int) screenX, (int) screenY, 40, 40);
+        
 
     }
 

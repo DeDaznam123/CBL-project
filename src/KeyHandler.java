@@ -9,7 +9,7 @@ public class KeyHandler implements KeyListener {
     public boolean sPressed;
     public boolean aPressed;
     public boolean dPressed;
-    public boolean escPressed;
+    public boolean pPressed;
 
     @Override
     public void keyPressed(KeyEvent arg0) {
@@ -28,8 +28,8 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_D:
                 dPressed = true;
                 break;
-            case KeyEvent.VK_ESCAPE:
-                escPressed = true;
+            case KeyEvent.VK_P:
+                pPressed = true;
                 break;
             default:
                 break;
@@ -53,8 +53,8 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_D:
                 dPressed = false;
                 break;
-            case KeyEvent.VK_ESCAPE:
-                escPressed = false;
+            case KeyEvent.VK_P:
+                pPressed = false;
                 break;
             default:
                 break;

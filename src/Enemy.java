@@ -11,6 +11,7 @@ public class Enemy {
     protected double y;
     protected int score;
     protected Player player;
+    protected int damage;
 
     /**
      * Enemy constructor.
@@ -20,6 +21,7 @@ public class Enemy {
         this.speed = 3;
         this.score = 50;
         this.player = player;
+        this.damage = 10;
     }
 
     /**
@@ -44,6 +46,11 @@ public class Enemy {
         if (!Grid.isInWall(newX, newY)) {
             this.x = newX;
             this.y = newY;
+        }
+
+        if (this.findDistance(player.getX(), player.getY()) < 32) {
+            player.takeDamage(this.damage);
+            this.spawn();
         }
     }
 
@@ -78,5 +85,9 @@ public class Enemy {
 
     public double getY() {
         return this.y;
+    }
+
+    public double findDistance(double x, double y) {
+        return Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
     }
 }

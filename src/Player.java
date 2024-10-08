@@ -19,6 +19,7 @@ public class Player {
     // Position of the player.
     private double x;
     private double y;
+    private int health;
 
     // Orientation in radians relative to absolute east (like unit circle).
     private static double orientation;
@@ -28,6 +29,7 @@ public class Player {
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
+        this.health = 100;
         orientation = 0;
     }
 
@@ -198,5 +200,13 @@ public class Player {
 
     public void setSpeedMultiplier(double speedMultiplier) {
         this.speedMultiplier = speedMultiplier;
+    }
+
+    public int getHealth() {
+        return health;
+    }   
+
+    public void takeDamage(int damage) {
+        health -= damage;
     }
 }
