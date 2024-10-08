@@ -16,7 +16,7 @@ Notes: When game is over, the user can press the restart button and reset the sc
 
 5) Player can kill the enemies by aiming and shooting.
 How to demo: Start the application, and then move the crosshair on the center of the screen over an enemy, then shoot using the E key. The enemy should dissapear after being shot.
-Notes: Not implemented yet.
+Notes: N/A
 
 6) Mini-map with real time tracking of player.
 How to demo: Start the aplication, there will be a top down 2D representation of the map on the top right of the screen.

@@ -11,7 +11,7 @@ public class Player {
     private static final int DOF = (Grid.getHeight() < Grid.getWidth()) ? Grid.getWidth() : Grid.getHeight();
 
     // How much to rotate the player.
-    private static final double ROTATION_INCREMENT = 0.05;
+    private static final double ROTATION_INCREMENT = 0.02;
 
     // Value of pi.
     private static final double PI = Math.PI;
@@ -22,6 +22,8 @@ public class Player {
 
     // Orientation in radians relative to absolute east (like unit circle).
     private static double orientation;
+
+    private double speedMultiplier = 4;
 
     public Player(double x, double y) {
         this.x = x;
@@ -143,8 +145,8 @@ public class Player {
     }
 
     public void moveForward() {
-        double newPosX = x + Math.cos(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
-        double newPosY = y + Math.sin(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
+        double newPosX = x + Math.cos(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * speedMultiplier;
+        double newPosY = y + Math.sin(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * speedMultiplier;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
@@ -152,8 +154,8 @@ public class Player {
     }
 
     public void moveBackward() {
-        double newPosX = x - Math.cos(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
-        double newPosY = y - Math.sin(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * 5;
+        double newPosX = x - Math.cos(orientation + ((App.WIDTH * App.getAngleIncrement()) / 2)) * speedMultiplier;
+        double newPosY = y - Math.sin(orientation + ((App.WIDTH * App.getAngleIncrement()) / 2)) * speedMultiplier;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
@@ -188,5 +190,13 @@ public class Player {
 
     public double getY() {
         return y;
+    }
+
+    public double getSpeedMultiplier() {
+        return speedMultiplier;
+    }
+
+    public void setSpeedMultiplier(double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier;
     }
 }

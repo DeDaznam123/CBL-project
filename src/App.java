@@ -28,6 +28,8 @@ public class App extends JPanel implements Runnable {
     private long fpsTimer = System.nanoTime();  // Timer to reset every second
     private int fps = 0;  // Store calculated FPS
 
+    boolean paused = false;
+
     // KeyHandler.
     KeyHandler keyHandler = new KeyHandler();
 
@@ -51,36 +53,41 @@ public class App extends JPanel implements Runnable {
         gameThread.start();
     }
 
+    public void pauseGame() { }
+
     public void run() {
         double timePerFrame = 1000000000 / FPS;
         enemy.spawn();
 
         while (gameThread != null) {
 
-            // Calculate time elapsed since last frame.
-            long now = System.nanoTime();
-            long elapsed = now - lastTime;
-            lastTime = now;
+            if (!paused) {
+                // Calculate time elapsed since last frame.
+                long now = System.nanoTime();
+                long elapsed = now - lastTime;
+                lastTime = now;
 
-            //Update, render, increase frame count.
-            update();
-            repaint();
-            frames++;
+                //Update, render, increase frame count.
+                update();
+                repaint();
+                frames++;
 
-            // FPS Calculation every 1 second (1e9 ns).
-            if (now - fpsTimer >= 1e9) {
-                fps = frames;
-                frames = 0;
-                fpsTimer += 1e9;
-            }
-
-            // If frame finished early, sleep to reach FPS target.
-            if (elapsed < timePerFrame) {
-                try {
-                    Thread.sleep((long) ((timePerFrame - elapsed) / 1e6));  // Convert nanoseconds to milliseconds
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                // FPS Calculation every 1 second (1e9 ns).
+                if (now - fpsTimer >= 1e9) {
+                    fps = frames;
+                    frames = 0;
+                    fpsTimer += 1e9;
                 }
+
+                // If frame finished early, sleep to reach FPS target.
+                if (elapsed < timePerFrame) {
+                    try {
+                        // Convert nanoseconds to milliseconds
+                        Thread.sleep((long) ((timePerFrame - elapsed) / 1e6));  
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }   
             }
         }
     }
@@ -114,6 +121,10 @@ public class App extends JPanel implements Runnable {
         drawFPSCounter(g2d);
     }
 
+    /**
+     * Draws the FPS text.
+     * @param g2d Graphics2D.
+     */
     public void drawFPSCounter(Graphics g2d) {
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
@@ -128,7 +139,7 @@ public class App extends JPanel implements Runnable {
         double distance;
         double projectedHeight;
         
-        g2d.setColor(Color.BLUE);
+        g2d.setColor(new Color(90, 90, 200));
         g2d.fillRect(0, 0, WIDTH, HEIGHT / 2);
         g2d.setColor(Color.DARK_GRAY);
         g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
