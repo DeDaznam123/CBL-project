@@ -5,20 +5,21 @@ import java.util.Random;
  */
 public class Enemy {
 
-    protected int speed;
+    protected double speed;
     protected int health;
     protected double x;
     protected double y;
     protected int score;
     protected Player player;
     protected int damage;
+    double orientation;
 
     /**
      * Enemy constructor.
      * @param player Player.
      */
     public Enemy(Player player) { 
-        this.speed = 3;
+        this.speed = 1;
         this.score = 50;
         this.player = player;
         this.damage = 10;
@@ -27,30 +28,19 @@ public class Enemy {
     /**
      * Moves the enemy towards the player.
      */
-    public void move() {
-        double newX = this.x;
-        double newY = this.y;
-
-        if (player.getX() > this.x) {
-            newX += this.speed;
-        } else if (player.getX() < this.x) {
-            newX -= this.speed;
-        }
+    public void move(Player p) {
         
-        if (player.getY() > this.y) {
-            newY += this.speed;
-        } else if (player.getY() < this.y) {
-            newY -= this.speed;
-        }
-        
-        if (!Grid.isInWall(newX, newY)) {
-            this.x = newX;
-            this.y = newY;
+        orientation = Math.atan2(p.getY() - y, p.getX() - x);
+        if (orientation > 2 * Math.PI) {
+            orientation -= 2 * Math.PI;
         }
 
-        if (this.findDistance(player.getX(), player.getY()) < 32) {
-            player.takeDamage(this.damage);
-            this.spawn();
+        double newPosX = x + Math.cos(orientation) * speed;
+        double newPosY = y + Math.sin(orientation) * speed;
+
+        if (!Grid.isInWall(newPosX, newPosY)) {
+            x = newPosX;
+            y = newPosY;
         }
     }
 
@@ -69,14 +59,17 @@ public class Enemy {
      * Spawns the enemy in a random square on the grid.
      */
     public void spawn() {
-        Random rand = new Random();
-        int p;
-        do {
-            p = rand.nextInt(Grid.getWidth() * Grid.getHeight());
-            x = p / Grid.getWidth() * 64;
-            y = p % Grid.getHeight() * 64;
-        } while (Grid.isInWall(x, y));
         health = 100;
+
+        Random rand = new Random();
+        int gridWidth = Grid.getWidth();
+        int gridHeight = Grid.getHeight();
+        int cellSize = Grid.getCellSize();
+        
+        do {
+            x = rand.nextInt(gridWidth * cellSize);
+            y = rand.nextInt(gridHeight * cellSize);
+        } while (Grid.isInWall(x, y));
     }
 
     public double getX() {
@@ -85,9 +78,5 @@ public class Enemy {
 
     public double getY() {
         return this.y;
-    }
-
-    public double findDistance(double x, double y) {
-        return Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2));
     }
 }

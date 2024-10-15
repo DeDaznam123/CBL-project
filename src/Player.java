@@ -22,9 +22,9 @@ public class Player {
     private int health;
 
     // Orientation in radians relative to absolute east (like unit circle).
-    private static double orientation;
+    private double orientation;
 
-    private double speedMultiplier = 4;
+    private double speedMultiplier = 2;
 
     public Player(double x, double y) {
         this.x = x;
@@ -61,8 +61,7 @@ public class Player {
             int xIndex = (int) xIntercept >> 6;
             int yIndex = (int) yIntercept >> 6;
 
-            if(yIndex < Grid.getHeight() && xIndex < Grid.getWidth() && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex]==1){
-
+            if(yIndex >= 0 && xIndex >= 0 && yIndex < Grid.getHeight() && xIndex < Grid.getWidth() && Grid.getGrid()[xIndex][yIndex]==1){
                 depth = DOF;
                 break;
                 

@@ -117,7 +117,7 @@ public class App extends JPanel implements Runnable {
 
         drawMap(g2d);
         drawMiniMap(g2d);
-        drawEnemy(g2d, enemy);
+        drawEnemy(g2d, enemy, player);
         drawFPSCounter(g2d);
         drawHealthBar(g2d);
     }
@@ -183,14 +183,6 @@ public class App extends JPanel implements Runnable {
                 distance = distanceTypes[1];
                 g2d.setColor(new Color(100, 100, 100));
             }
-            // double x1 = player.getX() + distance/6.4 * 
-            // Math.cos(player.getOrientation() + (i * ANGLE_INCREMENT));
-
-            // double y1 = player.getY() + distance/6.4 * 
-            //Math.sin(player.getOrientation() + (i * ANGLE_INCREMENT));
-
-            // double rayAngle = player.getOrientation() + (i * App.ANGLE_INCREMENT);
-            // rayAngle = (rayAngle + 2 * PI) % (2 * PI); 
 
             projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
             g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
@@ -217,18 +209,68 @@ public class App extends JPanel implements Runnable {
                 }
             }
         }
+
         g2d.fillRect((int) (player.getX() / 6.4 * 1.5) + 25,
             (int) (player.getY() / 6.4 * 1.5) + 25, 3, 3);
+        
+        g2d.setColor(Color.ORANGE);
+        g2d.fillRect((int) (enemy.getX() / 6.4 * 1.5) + 25,
+            (int) (enemy.getY() / 6.4 * 1.5) + 25, 3, 3);
     }
-
+    
     /**
-     * Draw one enemy.
+     * Draw one enemy in a raycasted 3D game.
      * @param g2d Graphics2D.
      * @param enemy Enemy to draw.
+     * @param player Player object containing position and direction.
      */
-    public void drawEnemy(Graphics2D g2d, Enemy enemy) {
+    public void drawEnemy(Graphics2D g2d, Enemy enemy, Player player) {
+
+        enemy.move(player);
+
         
 
+        // Calculate the relative position of the enemy to the player
+        double relX = player.getX() - enemy.getX();
+        double relY = player.getY() - enemy.getY();
+        
+        // Calculate the angle between the player's orientation and the enemy
+        double angleToEnemy = Math.atan2(relY, relX);
+        double relativeAngle = angleToEnemy - player.getOrientation();
+        
+        // Normalize the angle to the range [-pi, pi]
+        if (relativeAngle < 0) {
+            relativeAngle += 2 * Math.PI;
+        }
+        if (relativeAngle > 2 * Math.PI) {
+            relativeAngle -= 2 * Math.PI;
+        }
+        
+        // Calculate the distance to the enemy
+        double distance = Math.sqrt(relX * relX + relY * relY);
+
+        double halfFOV = Math.toRadians(Player.getFOV() / 2.0);
+
+        // Project the enemy's position onto the 2D screen
+        int screenWidth = g2d.getClipBounds().width;
+        int screenHeight = g2d.getClipBounds().height;
+        int screenX = (int) ((relativeAngle / halfFOV) * (screenWidth / 2) + (screenWidth / 2));
+        int screenY = (int) (screenHeight / 2 - (screenHeight / distance));
+
+        // Adjust the size of the enemy square based on the distance
+        int maxSize = 50; // Maximum size of the enemy square
+        int minSize = 10; // Minimum size of the enemy square
+        int size = (int) (maxSize / (distance / 100));
+        size = Math.max(minSize, Math.min(maxSize, size));
+
+        // Check if the enemy is within the player's field of view
+        if (Math.abs(relativeAngle) < halfFOV) {
+            // Set the color for the enemy
+            g2d.setColor(Color.RED); // Assuming enemies are red, you can change this as needed
+
+            // Draw the enemy as a rectangle (you can change this to any shape)
+            g2d.fillRect(screenX, screenY, size, size);
+        }
     }
 
     public static double getAngleIncrement() {
