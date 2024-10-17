@@ -58,7 +58,7 @@ public class App extends JPanel implements Runnable {
 
     public void run() {
         double timePerFrame = 1000000000 / FPS;
-        enemy.spawn();
+        enemy.respawn();
 
         while (gameThread != null) {
 
@@ -121,6 +121,7 @@ public class App extends JPanel implements Runnable {
         drawEnemy(g2d, enemy, player);
         drawFPSCounter(g2d);
         drawHealthBar(g2d);
+        drawScore(g2d);
         drawCursor(g2d);
     }
 
@@ -240,6 +241,8 @@ public class App extends JPanel implements Runnable {
         double deltaY = enemy.getY() - player.getY();
         double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
+        enemy.takeDamage(1);
+        
         if (distance < 32) {
             player.takeDamage(enemy.getDamage());
         } else {
@@ -267,7 +270,7 @@ public class App extends JPanel implements Runnable {
             (WIDTH / 2 + Math.tan(relativeAngle) * DISTANCE_PLAYER_TO_PLANE * -1);
         // Adjust size based on distance
         int enemySize = (int) 
-            (32 / distance * DISTANCE_PLAYER_TO_PLANE); 
+            (16 / distance * DISTANCE_PLAYER_TO_PLANE); 
 
         // Draw the enemy as a rectangle
         int adjustedX = enemyScreenX - enemySize / 2;
@@ -286,6 +289,16 @@ public class App extends JPanel implements Runnable {
         g2d.setColor(Color.GREEN);
         g2d.fillRect(healthBarX, healthBarY, 
             (int) (healthBarWidth * (enemy.health / 100.0)), healthBarHeight);
+    }
+
+    /**
+     * Draws the player's score.
+     * @param g2d Graphics2D.
+     */
+    public void drawScore(Graphics2D g2d) {
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
+        g2d.drawString("Score: " + player.getScore(), 185, 60);
     }
 
     public static double getAngleIncrement() {

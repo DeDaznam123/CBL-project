@@ -19,11 +19,13 @@ public class Player {
     // Position of the player.
     private double x;
     private double y;
+
+    // Health and score of the player.
     private int health;
+    private int score;
 
     // Orientation in radians relative to absolute east (like unit circle).
     private double orientation;
-
 
     private double rayAngle;
 
@@ -32,6 +34,8 @@ public class Player {
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
+        // Because the enemy gives points when spawning the first time.
+        this.score = -50;
         this.health = 100;
         orientation = 0;
     }
@@ -221,5 +225,13 @@ public class Player {
 
     public void takeDamage(int damage) {
         health -= damage;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void addScore(int score) {
+        this.score += score;
     }
 }

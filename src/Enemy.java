@@ -54,15 +54,16 @@ public class Enemy {
     public void takeDamage(int damage) {
         this.health -= damage;
         if (this.health <= 0) {
-            this.spawn();
+            this.respawn();
         }
     }
 
     /**
      * Spawns the enemy in a random square on the grid.
      */
-    public void spawn() {
+    public void respawn() {
         health = 100;
+        player.addScore(scoreValue);
 
         Random rand = new Random();
         int gridWidth = Grid.getWidth();
