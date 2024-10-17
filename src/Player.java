@@ -8,7 +8,7 @@ public class Player {
     private static final int FOV = 60;
 
     // Depth of field (Largest side of the grid.)
-    private static final int DOF = (Grid.getHeight() < Grid.getWidth()) ? Grid.getWidth() : Grid.getHeight();
+    private static final int DOF = Grid.getSize() * Grid.getCellSize();
 
     // How much to rotate the player.
     private static final double ROTATION_INCREMENT = 0.02;
@@ -33,35 +33,38 @@ public class Player {
         orientation = 0;
     }
 
-    public double castForHorizontalDistance(double rayAngle, double yIntercept, double dy, double xIntercept, double dx, double tan, double depth) {
-        double aTan = -1 / tan;
+    public double castForHorizontalDistance(double rayAngle) {
+        double aTan = 1 / Math.tan(rayAngle);
+        double xIntercept = 0;
+        double yIntercept = 0;
+        double dx = 0;
+        double dy = 0;
+        double depth = 0;
 
         // Facing up.
-        if (rayAngle > PI){
-            yIntercept = y - (y % 64) - 0.0001;
+        if (Math.sin(rayAngle) > 0.0001) {
+            yIntercept = (((int) y >> 6) << 6)  - 0.0001;
             xIntercept = (y - yIntercept) * aTan + x;
             dy = -64;
             dx = -dy * aTan;
-        }
         // Facing down.
-        if (rayAngle < PI){
-            yIntercept = y - (y % 64) + 64;
+        } else if (Math.sin(rayAngle) < -0.0001) {
+            yIntercept = (((int) y >> 6) << 6) + 64;
             xIntercept = (y - yIntercept) * aTan + x;
             dy = 64;
             dx = -dy * aTan;
-        }
         // Facing directly left or right.
-        if (rayAngle == 0 || rayAngle == PI){
+        } else if (Math.sin(rayAngle) == 0) {
             xIntercept = x;
             yIntercept = y;
             depth = DOF;
         }
 
-        while(depth < DOF){
+        while(depth < DOF) {
             int xIndex = (int) xIntercept >> 6;
             int yIndex = (int) yIntercept >> 6;
 
-            if(yIndex >= 0 && xIndex >= 0 && yIndex < Grid.getHeight() && xIndex < Grid.getWidth() && Grid.getGrid()[xIndex][yIndex]==1){
+            if(yIndex >= 0 && xIndex >= 0 && yIndex < Grid.getSize() && xIndex < Grid.getSize() && Grid.getGrid()[yIndex][xIndex]==1) {
                 depth = DOF;
                 break;
                 
@@ -75,35 +78,38 @@ public class Player {
         return Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept));
     }
 
-    public double castForVerticalDistance(double rayAngle, double yIntercept, double dy, double xIntercept, double dx, double tan, double depth) {
-        double nTan = -tan;
-        
+    public double castForVerticalDistance(double rayAngle) {
+        double tan = Math.tan(rayAngle);
+        double xIntercept = 0;
+        double yIntercept = 0;
+        double dx = 0;
+        double dy = 0;
+        double depth = 0;
+
         // If the ray is facing left.
-        if (rayAngle > PI/2 && rayAngle < 3*PI/2){
-            xIntercept = x - (x % 64) - 0.0001;
-            yIntercept = (x - xIntercept) * nTan + y;
-            dx = -64;
-            dy = -dx * nTan;
-        }
-        // If the ray is facing right.
-        if (rayAngle < PI/2 || rayAngle > 3*PI/2){
-            xIntercept = x - (x % 64) + 64;
-            yIntercept = (x - xIntercept) * nTan + y;
+        if (Math.cos(rayAngle) > 0.0001) {
+            xIntercept = (((int) x >> 6) << 6) + 64;
+            yIntercept = (x - xIntercept) * tan + y;
             dx = 64;
-            dy = -dx * nTan;
-        }
+            dy = -dx * tan;
+        // If the ray is facing right.
+        } else if (Math.cos(rayAngle) < -0.0001) {
+            xIntercept = (((int) x >> 6) << 6) - 0.0001;
+            yIntercept = (x - xIntercept) * tan + y;
+            dx = -64;
+            dy = -dx * tan;
         // Up / Down.
-        if (rayAngle == 0 || rayAngle == PI){
+        } else if (Math.cos(rayAngle) == 0) {
             xIntercept = x;
             yIntercept = y;
             depth = DOF;
         }
 
-        while(depth < DOF){
-            int xIndex = (int)xIntercept >> 6;
-            int yIndex = (int)yIntercept >> 6;
+        while(depth < DOF) {
+            int xIndex = (int) xIntercept >> 6;
+            int yIndex = (int) yIntercept >> 6;
 
-            if(yIndex < Grid.getHeight() && xIndex < Grid.getWidth() && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex]==1){      
+            if (yIndex < Grid.getSize() && xIndex < Grid.getSize() && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[yIndex][xIndex] == 1) {      
                 depth = DOF;
                 break;
                 
@@ -118,45 +124,53 @@ public class Player {
     }
 
     // Cast one ray from the player.
-    public double[] castRay(double i) {
+    public double[] rayCast() {
+
+        // Number of rays to cast.
+        int nOfRays = 500;
 
         // Position and angle of the ray.
-        double xIntercept = 0;
-        double yIntercept = 0;
-        double rayAngle = orientation + (i * App.getAngleIncrement());
-        rayAngle = (rayAngle + 2 * PI) % (2 * PI);
-        
-        // System.out.println("RayAngle: " + rayAngle);
-        double tan;
+        double rayAngle = orientation + (PI / 6);
+        double[] distances = new double[nOfRays];
 
-        // Avoid values where tan is Undefined and avoid division by 0
-        if (rayAngle == PI / 2 || rayAngle == 3 * PI / 2) {
-            rayAngle += 0.0001;
-        } else if (rayAngle == 0 || rayAngle == PI) {
-            rayAngle += 0.0001;
+        // Cast rays.
+        for (int i = 0; i < nOfRays; i++) {
+
+            // Normalize the angle.
+            if (rayAngle < 0) {
+                rayAngle += 2 * PI;
+            } else if (rayAngle > 2 * PI) {
+                rayAngle -= 2 * PI;
+            }
+
+            // Avoid values where tan is Undefined and avoid division by 0
+            if (rayAngle == PI / 2 || rayAngle == 3 * PI / 2 || rayAngle == 0 || rayAngle == PI) {
+                rayAngle += 0.0001;
+            }
+            
+            // Check horizontal Lines and vertical lines
+            double distH = castForHorizontalDistance(rayAngle);
+            double distV = castForVerticalDistance(rayAngle);
+            distances[i] = Math.min(distH, distV);
+            
+            rayAngle -= App.getAngleIncrement();
         }
-        
-        tan = Math.tan(rayAngle);
 
-        // Check horizontal Lines and vertical lines
-        double distH = castForHorizontalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
-        double distV = castForVerticalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
-
-        return new double[] {distH, distV};
+        return distances;
     }
 
     public void moveForward() {
-        double newPosX = x + Math.cos(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * speedMultiplier;
-        double newPosY = y + Math.sin(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * speedMultiplier;
+        double newPosX = x + Math.cos(orientation) * speedMultiplier;
+        double newPosY = y + Math.sin(orientation) * speedMultiplier;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
         }
     }
-
+    
     public void moveBackward() {
-        double newPosX = x - Math.cos(orientation + ((App.WIDTH * App.getAngleIncrement()) / 2)) * speedMultiplier;
-        double newPosY = y - Math.sin(orientation + ((App.WIDTH * App.getAngleIncrement()) / 2)) * speedMultiplier;
+        double newPosX = x - Math.cos(orientation) * speedMultiplier;
+        double newPosY = y - Math.sin(orientation) * speedMultiplier;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
@@ -164,16 +178,16 @@ public class Player {
     }
 
     public void rotateRight() {
-        orientation += ROTATION_INCREMENT;
-        if (orientation > (2 * PI)) {
-            orientation -= 2 * PI;
+        orientation -= ROTATION_INCREMENT;
+        if (orientation < 0) {
+            orientation += 2 * PI;
         }
     }
 
     public void rotateLeft() {
-        orientation -= ROTATION_INCREMENT;
-        if (orientation < 0) {
-            orientation += 2 * PI;
+        orientation += ROTATION_INCREMENT;
+        if (orientation > 2 * PI) {
+            orientation -= 2 * PI;
         }
     }
 

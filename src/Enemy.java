@@ -13,6 +13,7 @@ public class Enemy {
     protected Player player;
     protected int damage;
     double orientation;
+    protected static final int SIZE = 32;
 
     /**
      * Enemy constructor.
@@ -23,6 +24,10 @@ public class Enemy {
         this.score = 50;
         this.player = player;
         this.damage = 10;
+    }
+
+    public int getSize() {
+        return SIZE;
     }
 
     /**
@@ -62,13 +67,11 @@ public class Enemy {
         health = 100;
 
         Random rand = new Random();
-        int gridWidth = Grid.getWidth();
-        int gridHeight = Grid.getHeight();
         int cellSize = Grid.getCellSize();
         
         do {
-            x = rand.nextInt(gridWidth * cellSize);
-            y = rand.nextInt(gridHeight * cellSize);
+            x = rand.nextInt(Grid.getSize() * cellSize);
+            y = rand.nextInt(Grid.getSize() * cellSize);
         } while (Grid.isInWall(x, y));
     }
 
