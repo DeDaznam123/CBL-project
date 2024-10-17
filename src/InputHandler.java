@@ -1,10 +1,9 @@
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 
 /**
  * Handles the keyboard input from the player.
  */
-public class KeyHandler implements KeyListener {
+public class InputHandler implements KeyListener, MouseListener {
     public boolean wPressed;
     public boolean sPressed;
     public boolean aPressed;
@@ -63,4 +62,25 @@ public class KeyHandler implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent arg0) { }
+
+    // Mouse related events
+
+    public boolean mouseClicked = false;
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        mouseClicked = true;
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) { }
+
+    @Override
+    public void mouseReleased(MouseEvent e) { }
+
+    @Override
+    public void mouseEntered(MouseEvent e) { }
+
+    @Override
+    public void mouseExited(MouseEvent e) { }
 }

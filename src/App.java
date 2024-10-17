@@ -1,5 +1,4 @@
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 /**
@@ -10,6 +9,8 @@ public class App extends JPanel implements Runnable {
     // Dimensions of the Projection Plane (pixels).
     public static final int WIDTH  = 1537;
     public static final int HEIGHT  = 795;
+
+    public static final Font FONT = new Font(Font.SANS_SERIF, Font.BOLD, 15);
     
     // planeCenter / tan(FOV / 2)
     private static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 
@@ -32,7 +33,7 @@ public class App extends JPanel implements Runnable {
     boolean paused = false;
 
     // KeyHandler.
-    KeyHandler keyHandler = new KeyHandler();
+    InputHandler inputHandler = new InputHandler();
 
     Thread gameThread;
 
@@ -41,7 +42,8 @@ public class App extends JPanel implements Runnable {
      */
     public App() {
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        this.addKeyListener(keyHandler);
+        this.addKeyListener(inputHandler);
+        this.addMouseListener(inputHandler);
         this.setFocusable(true);
         startGame();
     }
@@ -97,17 +99,21 @@ public class App extends JPanel implements Runnable {
      * Updates the player's position.
      */
     public void update() {
-        if (keyHandler.wPressed) {
+        if (inputHandler.wPressed) {
             player.moveForward();
         }
-        if (keyHandler.sPressed) {
+        if (inputHandler.sPressed) {
             player.moveBackward();
         }
-        if (keyHandler.aPressed) {
+        if (inputHandler.aPressed) {
             player.rotateLeft();
         }
-        if (keyHandler.dPressed) {
+        if (inputHandler.dPressed) {
             player.rotateRight();
+        }
+        if (inputHandler.mouseClicked) {
+            player.shoot(enemy);
+            inputHandler.mouseClicked = false;
         }
     }
     
@@ -143,8 +149,12 @@ public class App extends JPanel implements Runnable {
         int health = player.getHealth();
         
         g2d.setColor(Color.BLACK);
-        g2d.drawString("HP: " + health, 24, 200);
-        g2d.fillRect(25, 210, 158, 35);
+
+        Font f = new Font(Font.SANS_SERIF, Font.BOLD, 15);
+        g2d.setFont(f);
+        g2d.drawString("HP: " + health, 185, 30 + Grid.getSize() * 15 + f.getSize());
+
+        g2d.fillRect(24, 32 + Grid.getSize() * 15, 158, 33);
 
         // Change color based on health.
         if (health < 25) {
@@ -157,7 +167,7 @@ public class App extends JPanel implements Runnable {
             g2d.setColor(new Color(0, 102, 0));
         }
 
-        g2d.fillRect(29, 214, (int) ((double) health * 1.5), 27);
+        g2d.fillRect(28,  36 + Grid.getSize() * 15, (int) ((double) health * 1.5), 25);
     }
 
     /**
@@ -166,8 +176,8 @@ public class App extends JPanel implements Runnable {
      */
     public void drawFPSCounter(Graphics g2d) {
         g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
-        g2d.drawString("FPS: " + fps, 185, 40);
+        g2d.setFont(FONT);
+        g2d.drawString("FPS: " + fps, 15 * Grid.getSize() + 30, 40);
     }
 
     /**
@@ -207,11 +217,14 @@ public class App extends JPanel implements Runnable {
      * @param g2d Graphics2D.
      */
     public void drawMiniMap(Graphics2D g2d) {
+
+        int size = Grid.getSize();
+
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(24, 24, 151, 151);
+        g2d.fillRect(24, 24, 15 * size + 1, 15 * size + 1);
         
-        for (int i = 0; i < Grid.getWidth(); i++) {
-            for (int j = 0; j < Grid.getHeight(); j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 if (Grid.getGrid()[i][j] == 1) {
                     g2d.setColor(Color.BLACK);
                     g2d.fillRect(25 + i * 15,
@@ -241,8 +254,6 @@ public class App extends JPanel implements Runnable {
         double deltaY = enemy.getY() - player.getY();
         double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-        enemy.takeDamage(1);
-        
         if (distance < 32) {
             player.takeDamage(enemy.getDamage());
         } else {
@@ -278,6 +289,12 @@ public class App extends JPanel implements Runnable {
         g2d.setColor(Color.RED);
         g2d.fillRect(adjustedX, adjustedY, enemySize, enemySize);
 
+        if (enemyScreenX < WIDTH / 2 + enemySize / 2 && enemyScreenX > WIDTH / 2 - enemySize / 2) {
+            enemy.setAimedAt(true);
+        } else {
+            enemy.setAimedAt(false);
+        }
+
         // Enemy health bar.
         int healthBarWidth = 30;
         int healthBarHeight = 5;
@@ -297,8 +314,9 @@ public class App extends JPanel implements Runnable {
      */
     public void drawScore(Graphics2D g2d) {
         g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
-        g2d.drawString("Score: " + player.getScore(), 185, 60);
+        g2d.setFont(FONT);
+        g2d.drawString("Score: " + player.getScore(), 185, 30
+            + Grid.getSize() * 15 + 2 * FONT.getSize());
     }
 
     public static double getAngleIncrement() {

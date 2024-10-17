@@ -8,8 +8,7 @@ public class Player {
     private static final int FOV = 60;
 
     // Depth of field (Largest side of the grid.)
-    private static final int DOF = (Grid.getHeight() < Grid.getWidth()) ? Grid.getWidth() : Grid.getHeight();
-
+    private static final int DOF = Grid.getSize() * Grid.getSize();
     // How much to rotate the player.
     private static final double ROTATION_INCREMENT = 0.02;
 
@@ -40,14 +39,10 @@ public class Player {
         orientation = 0;
     }
 
-    public void shootEnemy(Enemy enemy) {
-        double centerX = App.WIDTH / 2;
-        double centerY = App.HEIGHT / 2;
-
-        // if (centerX >= enemyScreenX - enemySize / 2 && centerX <= enemyScreenX + enemySize / 2 &&
-        //     centerY >= enemyScreenY - enemySize && centerY <= enemyScreenY) {
-        //     enemy.takeDamage(10); // Apply damage to the enemy
-        // }
+    public void shoot(Enemy enemy) {
+        if (enemy.isAimedAt()) {
+            enemy.takeDamage(25);
+        }
     }
 
     public double castForHorizontalDistance(double rayAngle) {
@@ -83,7 +78,7 @@ public class Player {
             int xIndex = (int) xIntercept >> 6;
             int yIndex = (int) yIntercept >> 6;
 
-            if(yIndex >= 0 && xIndex >= 0 && yIndex < Grid.getHeight() && xIndex < Grid.getWidth() && Grid.getGrid()[xIndex][yIndex]==1){
+            if(yIndex >= 0 && xIndex >= 0 && yIndex < Grid.getSize() && xIndex < Grid.getSize() && Grid.getGrid()[xIndex][yIndex]==1){
                 depth = DOF;
                 break;
                 
@@ -130,7 +125,7 @@ public class Player {
             int xIndex = (int)xIntercept >> 6;
             int yIndex = (int)yIntercept >> 6;
 
-            if(yIndex < Grid.getHeight() && xIndex < Grid.getWidth() && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex]==1){      
+            if(yIndex < Grid.getSize() && xIndex < Grid.getSize() && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex]==1){      
                 depth = DOF;
                 break;
                 

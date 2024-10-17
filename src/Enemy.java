@@ -14,7 +14,14 @@ public class Enemy {
     protected int scoreValue;
     protected Player player;
     protected int damage;
-    double orientation;
+    protected double orientation;
+
+    protected double enemyScreenX;
+    protected double enemyScreenY;
+
+    protected int size = 16;
+
+    protected boolean aimedAt = false;
 
     /**
      * Enemy constructor.
@@ -47,6 +54,10 @@ public class Enemy {
         }
     }
 
+    public int getSize() {
+        return this.size;
+    }
+
     /**
      * Removes health from the player.
      * @param damage How much health to remove.
@@ -58,6 +69,22 @@ public class Enemy {
         }
     }
 
+    public void setAimedAt(boolean aimedAt) {
+        this.aimedAt = aimedAt;
+    }
+
+    public boolean isAimedAt() {
+        return aimedAt;
+    }
+
+    public double getScreenX() {
+        return enemyScreenX;
+    }
+
+    public double getScreenY() {
+        return enemyScreenY;
+    }
+
     /**
      * Spawns the enemy in a random square on the grid.
      */
@@ -66,13 +93,12 @@ public class Enemy {
         player.addScore(scoreValue);
 
         Random rand = new Random();
-        int gridWidth = Grid.getWidth();
-        int gridHeight = Grid.getHeight();
+        int gridSize = Grid.getSize();
         int cellSize = Grid.getCellSize();
         
         do {
-            x = rand.nextInt(gridWidth * cellSize);
-            y = rand.nextInt(gridHeight * cellSize);
+            x = rand.nextInt(gridSize * cellSize);
+            y = rand.nextInt(gridSize * cellSize);
         } while (Grid.isInWall(x, y));
     }
 
@@ -86,5 +112,13 @@ public class Enemy {
 
     public int getDamage() {
         return this.damage;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getScoreValue() {
+        return scoreValue;
     }
 }
