@@ -7,9 +7,11 @@ public class Enemy {
 
     protected double speed;
     protected int health;
+
     protected double x;
     protected double y;
-    protected int score;
+
+    protected int scoreValue;
     protected Player player;
     protected int damage;
     double orientation;
@@ -20,9 +22,10 @@ public class Enemy {
      */
     public Enemy(Player player) { 
         this.speed = 1;
-        this.score = 50;
+        this.scoreValue = 50;
         this.player = player;
-        this.damage = 10;
+        this.damage = 1;
+        this.health = 100;
     }
 
     /**
@@ -78,5 +81,9 @@ public class Enemy {
 
     public double getY() {
         return this.y;
+    }
+
+    public int getDamage() {
+        return this.damage;
     }
 }

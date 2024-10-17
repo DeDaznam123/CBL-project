@@ -24,6 +24,9 @@ public class Player {
     // Orientation in radians relative to absolute east (like unit circle).
     private double orientation;
 
+
+    private double rayAngle;
+
     private double speedMultiplier = 2;
 
     public Player(double x, double y) {
@@ -33,8 +36,23 @@ public class Player {
         orientation = 0;
     }
 
-    public double castForHorizontalDistance(double rayAngle, double yIntercept, double dy, double xIntercept, double dx, double tan, double depth) {
-        double aTan = -1 / tan;
+    public void shootEnemy(Enemy enemy) {
+        double centerX = App.WIDTH / 2;
+        double centerY = App.HEIGHT / 2;
+
+        // if (centerX >= enemyScreenX - enemySize / 2 && centerX <= enemyScreenX + enemySize / 2 &&
+        //     centerY >= enemyScreenY - enemySize && centerY <= enemyScreenY) {
+        //     enemy.takeDamage(10); // Apply damage to the enemy
+        // }
+    }
+
+    public double castForHorizontalDistance(double rayAngle) {
+        double aTan = -1 / Math.tan(rayAngle);
+        double xIntercept = 0;
+        double yIntercept = 0;
+        double dx = 0;
+        double dy = 0;
+        double depth = 0;
 
         // Facing up.
         if (rayAngle > PI){
@@ -75,9 +93,14 @@ public class Player {
         return Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept));
     }
 
-    public double castForVerticalDistance(double rayAngle, double yIntercept, double dy, double xIntercept, double dx, double tan, double depth) {
-        double nTan = -tan;
-        
+    public double castForVerticalDistance(double rayAngle) {
+        double nTan = -Math.tan(rayAngle);
+        double xIntercept = 0;
+        double yIntercept = 0;
+        double dx = 0;
+        double dy = 0;
+        double depth = 0;
+
         // If the ray is facing left.
         if (rayAngle > PI/2 && rayAngle < 3*PI/2){
             xIntercept = x - (x % 64) - 0.0001;
@@ -120,34 +143,25 @@ public class Player {
     // Cast one ray from the player.
     public double[] castRay(double i) {
 
-        // Position and angle of the ray.
-        double xIntercept = 0;
-        double yIntercept = 0;
-        double rayAngle = orientation + (i * App.getAngleIncrement());
+        // Angle of the ray.
+        rayAngle = orientation + (PI / 6) - (i * App.getAngleIncrement());
         rayAngle = (rayAngle + 2 * PI) % (2 * PI);
         
-        // System.out.println("RayAngle: " + rayAngle);
-        double tan;
-
         // Avoid values where tan is Undefined and avoid division by 0
-        if (rayAngle == PI / 2 || rayAngle == 3 * PI / 2) {
-            rayAngle += 0.0001;
-        } else if (rayAngle == 0 || rayAngle == PI) {
+        if (rayAngle == PI / 2 || rayAngle == 3 * PI / 2 || rayAngle == 0 || rayAngle == PI) {
             rayAngle += 0.0001;
         }
         
-        tan = Math.tan(rayAngle);
-
         // Check horizontal Lines and vertical lines
-        double distH = castForHorizontalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
-        double distV = castForVerticalDistance(rayAngle, yIntercept, 0, xIntercept, 0, tan, 0);
+        double distH = castForHorizontalDistance(rayAngle);
+        double distV = castForVerticalDistance(rayAngle);
 
         return new double[] {distH, distV};
     }
 
     public void moveForward() {
-        double newPosX = x + Math.cos(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * speedMultiplier;
-        double newPosY = y + Math.sin(orientation+((App.WIDTH * App.getAngleIncrement())/2)) * speedMultiplier;
+        double newPosX = x + Math.cos(orientation) * speedMultiplier;
+        double newPosY = y + Math.sin(orientation) * speedMultiplier;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
@@ -155,22 +169,22 @@ public class Player {
     }
 
     public void moveBackward() {
-        double newPosX = x - Math.cos(orientation + ((App.WIDTH * App.getAngleIncrement()) / 2)) * speedMultiplier;
-        double newPosY = y - Math.sin(orientation + ((App.WIDTH * App.getAngleIncrement()) / 2)) * speedMultiplier;
+        double newPosX = x - Math.cos(orientation) * speedMultiplier;
+        double newPosY = y - Math.sin(orientation) * speedMultiplier;
         if (!Grid.isInWall(newPosX, newPosY)) {
             x = newPosX;
             y = newPosY;
         }
     }
 
-    public void rotateRight() {
+    public void rotateLeft() {
         orientation += ROTATION_INCREMENT;
         if (orientation > (2 * PI)) {
             orientation -= 2 * PI;
         }
     }
 
-    public void rotateLeft() {
+    public void rotateRight() {
         orientation -= ROTATION_INCREMENT;
         if (orientation < 0) {
             orientation += 2 * PI;
