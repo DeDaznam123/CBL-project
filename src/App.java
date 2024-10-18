@@ -61,6 +61,7 @@ public class App extends JPanel implements Runnable {
     public void run() {
         double timePerFrame = 1000000000 / FPS;
         enemy.respawn();
+        Grid.generateGrid();
 
         while (gameThread != null) {
 
@@ -152,9 +153,9 @@ public class App extends JPanel implements Runnable {
 
         Font f = new Font(Font.SANS_SERIF, Font.BOLD, 15);
         g2d.setFont(f);
-        g2d.drawString("HP: " + health, 185, 30 + Grid.getSize() * 15 + f.getSize());
+        g2d.drawString("HP: " + health, 185, 180 + f.getSize());
 
-        g2d.fillRect(24, 32 + Grid.getSize() * 15, 158, 33);
+        g2d.fillRect(24, 182, 158, 33);
 
         // Change color based on health.
         if (health < 25) {
@@ -167,7 +168,7 @@ public class App extends JPanel implements Runnable {
             g2d.setColor(new Color(0, 102, 0));
         }
 
-        g2d.fillRect(28,  36 + Grid.getSize() * 15, (int) ((double) health * 1.5), 25);
+        g2d.fillRect(28,  186, (int) ((double) health * 1.5), 25);
     }
 
     /**
@@ -177,7 +178,7 @@ public class App extends JPanel implements Runnable {
     public void drawFPSCounter(Graphics g2d) {
         g2d.setColor(Color.BLACK);
         g2d.setFont(FONT);
-        g2d.drawString("FPS: " + fps, 15 * Grid.getSize() + 30, 40);
+        g2d.drawString("FPS: " + fps,  180, 40);
     }
 
     /**
@@ -221,24 +222,24 @@ public class App extends JPanel implements Runnable {
         int size = Grid.getSize();
 
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(24, 24, 15 * size + 1, 15 * size + 1);
+        g2d.fillRect(24, 24, 151, 151);
         
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (Grid.getGrid()[i][j] == 1) {
                     g2d.setColor(Color.BLACK);
-                    g2d.fillRect(25 + i * 15,
-                        25 + j * 15, 14, 14);
+                    g2d.fillRect(25 + i * (150/size),
+                        25 + j * (150/size), (150/size)-1, (150/size)-1);
                 }
             }
         }
 
-        g2d.fillRect((int) (player.getX() / 6.4 * 1.5) + 25,
-            (int) (player.getY() / 6.4 * 1.5) + 25, 3, 3);
+        g2d.fillRect((int) (player.getX() / (64/(150/(double)size))) + 25,
+            (int) (player.getY() / (64/(150/(double)size))) + 25, 3, 3);
         
         g2d.setColor(Color.ORANGE);
-        g2d.fillRect((int) (enemy.getX() / 6.4 * 1.5) + 25,
-            (int) (enemy.getY() / 6.4 * 1.5) + 25, 3, 3);
+        g2d.fillRect((int) (enemy.getX() /  (64/(150/(double)size))) + 25,
+            (int) (enemy.getY() / (64/(150/(double)size))) + 25, 3, 3);
     }
     
     /**
@@ -247,6 +248,7 @@ public class App extends JPanel implements Runnable {
      * @param enemy Enemy.
      * @param player Player.
      */
+    
     public void drawEnemy(Graphics2D g2d, Enemy enemy, Player player) {
 
         // Calculate distance from player to enemy
@@ -286,6 +288,11 @@ public class App extends JPanel implements Runnable {
         // Draw the enemy as a rectangle
         int adjustedX = enemyScreenX - enemySize / 2;
         int adjustedY = HEIGHT / 2 - enemySize / 2;
+
+        if(distance > Math.min(player.castRay(adjustedX+enemySize/2)[0], player.castRay(adjustedX+enemySize/2)[1])) {
+            return;
+        }
+
         g2d.setColor(Color.RED);
         g2d.fillRect(adjustedX, adjustedY, enemySize, enemySize);
 
@@ -294,7 +301,7 @@ public class App extends JPanel implements Runnable {
         } else {
             enemy.setAimedAt(false);
         }
-
+        
         // Enemy health bar.
         int healthBarWidth = 30;
         int healthBarHeight = 5;
@@ -315,8 +322,7 @@ public class App extends JPanel implements Runnable {
     public void drawScore(Graphics2D g2d) {
         g2d.setColor(Color.BLACK);
         g2d.setFont(FONT);
-        g2d.drawString("Score: " + player.getScore(), 185, 30
-            + Grid.getSize() * 15 + 2 * FONT.getSize());
+        g2d.drawString("Score: " + player.getScore(), 185, 180 + 2 * FONT.getSize());
     }
 
     public static double getAngleIncrement() {
