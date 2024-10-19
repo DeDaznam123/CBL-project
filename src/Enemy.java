@@ -1,4 +1,4 @@
-import java.util.Random;
+import java.util.*;
 
 /**
  * Enemy class.
@@ -10,49 +10,86 @@ public class Enemy {
 
     protected double x;
     protected double y;
+    protected double nextX;
+    protected double nextY;
+
+    protected boolean firstTime = true;
 
     protected int scoreValue;
-    protected Player player;
     protected int damage;
     protected double orientation;
-
-    protected double enemyScreenX;
-    protected double enemyScreenY;
-
     protected int size = 16;
 
+    protected Player player;
     protected boolean aimedAt = false;
+
+    List<int[]> path = new ArrayList<int[]>();
+    int counter;
+
+    int[] oldEnd;
 
     /**
      * Enemy constructor.
      * @param player Player.
      */
     public Enemy(Player player) { 
-        this.speed = 1;
+        this.speed = 0.05;
         this.scoreValue = 50;
         this.player = player;
         this.damage = 1;
         this.health = 100;
+
+        oldEnd = new int[]{(int) player.getX() / Grid.getCellSize(),
+            (int) player.getY() / Grid.getCellSize()};
+        int[] start = {(int) x / Grid.getCellSize(), (int) y / Grid.getCellSize()};
+        Grid.performAStar(start, oldEnd);
+
+        firstTime = false;
     }
 
-    /**
-     * Moves the enemy towards the player.
-     */
-    public void move(Player p) {
-        
-        orientation = Math.atan2(p.getY() - y, p.getX() - x);
-        if (orientation > 2 * Math.PI) {
-            orientation -= 2 * Math.PI;
+    public void move() {
+        int cellSize = Grid.getCellSize();
+    
+        // Position of enemy on grid.
+        int[] start = {(int) x / cellSize, (int) y / cellSize};
+        // Position of player on grid.
+        int[] end = {(int) player.getX() / cellSize, (int) player.getY() / cellSize};
+    
+        // Recalculate path if the player has moved or no path found.
+        if (!Arrays.equals(oldEnd, end) || path == null || path.isEmpty()) {
+            path = Grid.performAStar(start, end);
+            oldEnd = end;
+            counter = 0;  
         }
+    
+        // Move enemy along path.
+        if (path != null && !path.isEmpty()) {
 
-        double newPosX = x + Math.cos(orientation) * speed;
-        double newPosY = y + Math.sin(orientation) * speed;
-
-        if (!Grid.isInWall(newPosX, newPosY)) {
-            x = newPosX;
-            y = newPosY;
+            // Next step in the path.
+            int[] step = path.get(counter);
+            nextX = step[0] * cellSize + cellSize / 2;
+            nextY = step[1] * cellSize + cellSize / 2;
+    
+            // Smooth interpolation.
+            x = lerp(x, nextX, speed);
+            y = lerp(y, nextY, speed);
+    
+            // Avoid getting stuck at tiny distances.
+            if (Math.abs(x - nextX) < 1 && Math.abs(y - nextY) < 1) {
+                counter++;  // Move to the next step in the path.
+    
+                // Enemy reached end of path.
+                if (counter >= path.size()) {
+                    counter = 0;
+                }
+            }
         }
     }
+
+    public static double lerp(double a, double b, double t) {
+        return a + t * (b - a);
+    }
+
 
     public int getSize() {
         return this.size;
@@ -75,14 +112,6 @@ public class Enemy {
 
     public boolean isAimedAt() {
         return aimedAt;
-    }
-
-    public double getScreenX() {
-        return enemyScreenX;
-    }
-
-    public double getScreenY() {
-        return enemyScreenY;
     }
 
     /**
