@@ -5,15 +5,6 @@ import java.util.*;
  */
 public class Grid {
 
-    // Directions for moving in the 4 cardinal directions (up, down, left, right)
-    private static final int[][] DIRECTIONS = {
-        {0, 1},  // Right
-        {1, 0},  // Down
-        {0, -1}, // Left
-        {-1, 0}  // Up
-    };
-
-    // Node class to represent each grid point
     static class Node implements Comparable<Node> {
         int x;
         int y;
@@ -45,10 +36,141 @@ public class Grid {
         }
     }
 
+    private static final int SIZE = 30;
+    private static int[][] grid = new int[SIZE][SIZE];
+
+    private final static int[][][] templateType1 = {
+        {{1,1,1,1,0,0,1,1,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,1,1,0,1,1,1,0,1},
+         {1,0,1,0,0,0,0,1,0,1},
+         {0,0,0,0,1,1,0,0,0,0},
+         {0,0,1,0,1,1,0,1,0,0},
+         {1,0,1,0,0,0,0,1,0,1},
+         {1,0,1,1,0,1,1,1,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        },
+       
+        {{1,1,1,1,0,0,1,1,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,1,1,0,0,1,1,0,1},
+         {1,0,1,1,0,0,1,1,0,1},
+         {0,0,0,0,0,0,0,0,0,0},
+         {0,0,0,0,0,0,0,0,0,0},
+         {1,0,1,1,0,0,1,1,0,1},
+         {1,0,1,1,0,0,1,1,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        },
+
+        {{1,1,1,1,0,0,1,1,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,0,1,1,1,1,0,0,1},
+         {0,0,0,1,1,1,1,0,0,0},
+         {0,0,0,1,1,1,1,0,0,0},
+         {1,0,0,1,1,1,1,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        }
+    };
+
+    private final static int[][][] templateType2 = {
+        {{1,1,1,1,1,1,1,1,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,1,1,1,1,1,0,0,1},
+         {1,0,1,0,0,0,0,0,0,1},
+         {1,0,1,0,0,0,0,0,0,0},
+         {1,0,1,0,0,1,1,0,0,0},
+         {1,0,1,0,0,1,1,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        },
+
+        {{1,1,1,1,1,1,1,1,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,1,1,1,0,0,0,0,1},
+         {1,0,1,1,1,0,0,0,0,1},
+         {1,0,1,1,0,0,0,0,0,0},
+         {1,0,0,0,0,0,1,1,0,0},
+         {1,0,0,0,0,1,1,1,0,1},
+         {1,0,0,0,0,1,1,1,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        },
+
+        {{1,1,1,1,1,1,1,1,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,0,1,1,1,1,0,0,1},
+         {1,0,1,1,1,1,1,1,0,1},
+         {1,0,1,1,1,1,1,1,0,0},
+         {1,0,1,1,1,1,1,1,0,0},
+         {1,0,1,1,1,1,1,1,0,1},
+         {1,0,0,1,1,1,1,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        }
+    };
+
+    private final static int[][][] templateType3 = {
+        {{1,1,1,1,1,1,1,1,1,1},
+         {1,1,0,0,0,0,0,0,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,1,1,0,0,1,1,0,1},
+         {0,0,0,0,0,0,0,0,0,0},
+         {0,0,0,0,0,0,0,0,0,0},
+         {1,0,1,1,0,0,1,1,0,1},
+         {1,0,0,1,0,0,1,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        },
+
+        {{1,1,1,1,1,1,1,1,1,1},
+         {1,1,1,1,1,1,1,1,1,1},
+         {1,1,1,1,1,1,1,1,1,1},
+         {1,1,1,1,1,1,1,1,1,1},
+         {0,0,0,0,0,0,0,0,0,0},
+         {0,0,0,0,0,0,0,0,0,0},
+         {1,1,1,1,0,0,1,1,1,1},
+         {1,1,1,1,0,0,1,1,1,1},
+         {1,1,1,1,0,0,1,1,1,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        },
+
+        {{1,1,1,1,1,1,1,1,1,1},
+         {1,1,0,0,0,0,0,0,1,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,0,1,1,0,0,1,1,0,1},
+         {0,0,1,1,0,0,1,1,0,0},
+         {0,0,1,1,0,0,1,1,0,0},
+         {1,0,1,1,0,0,1,1,0,1},
+         {1,0,0,1,0,0,1,0,0,1},
+         {1,0,0,0,0,0,0,0,0,1},
+         {1,1,1,1,0,0,1,1,1,1}
+        }
+    };
+        
+    // Pixels per cell in grid.
+    private static final int CELL_SIZE = 64;
+    // Directions for moving in the 4 cardinal directions (up, down, left, right)
+    private static final int[][] DIRECTIONS = {
+        {0, 1},  // Right
+        {1, 0},  // Down
+        {0, -1}, // Left
+        {-1, 0}  // Upconflicts
+    };
+
+    // Node class to represent each grid point
+    
+
     // Heuristic function (Manhattan distance)
     private static int heuristic(int x1, int y1, int x2, int y2) {
         return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
+
 
     /**
      * Perform A* search to find the shortest path from start to goal.
@@ -59,10 +181,9 @@ public class Grid {
     public static List<int[]> performAStar(int[] start, int[] goal) {
         PriorityQueue<Node> openSet = new PriorityQueue<>();
         Map<String, Node> allNodes = new HashMap<>();
-
         // Start node
         Node startNode = new Node(start[0], start[1], 0,
-            heuristic(start[0], start[1], goal[0], goal[1]), null);
+        heuristic(start[0], start[1], goal[0], goal[1]), null);
         openSet.add(startNode);
         allNodes.put(start[0] + "," + start[1], startNode);
 
@@ -87,7 +208,7 @@ public class Grid {
                     Node neighbor = allNodes.getOrDefault(neighborKey, new Node(neighborX,
                         neighborY, Integer.MAX_VALUE, Integer.MAX_VALUE, null));
 
-                    // If this path to neighbor is better, update it
+                    // If this path to ngenerateGrideighbor is better, update it
                     if (tentativeG < neighbor.g) {
                         neighbor.g = tentativeG;
                         neighbor.f = neighbor.g + heuristic(neighborX, neighborY, goal[0], goal[1]);
@@ -99,16 +220,76 @@ public class Grid {
                         }
                     }
                 }
+
             }
         }
-        // No path found, return an empty list
-        return new ArrayList<>();
+     // No path found, return an empty list
+     return new ArrayList<>();
+ }
+
+
+    public static void generateGrid() {
+        int randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType2[1], 0, 0, 0);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType3[randomnumber], 1, 10, 0);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType2[1], 1, 20, 0);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType3[randomnumber], 0, 0, 10);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType1[randomnumber], 0, 10, 10);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType3[randomnumber], 2, 20, 10);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType2[randomnumber], 3, 0, 20);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType3[randomnumber], 3, 10, 20);
+        randomnumber = (int) (Math.random() * 3);
+        useTemplate(templateType2[randomnumber], 2, 20, 20);
+        
+
     }
+
+    private static void useTemplate(int[][] template, int rotation, int x, int y) {
+        int[][] templateCopy = new int[template.length][template[0].length]; 
+        for (int i = 0; i < template.length; i++) {
+            for (int j = 0; j < template[i].length; j++) {
+                templateCopy[i][j] = template[i][j];
+            }
+        }
+        for(int i=0;i<rotation;i++) {
+            templateCopy=rotate(templateCopy);
+        }
+        for (int i=0;i<templateCopy.length;i++) {
+            for (int j=0;j<templateCopy[i].length;j++) {
+                grid[x+i][y+j] = templateCopy[i][j];
+            }
+        }
+    }
+
+    private static int[][] rotate(int[][] template) {
+        int[][] templateCopy = new int[template.length][template[0].length]; 
+        for (int i = 0; i < template.length; i++) {
+            for (int j = 0; j < template[i].length; j++) {
+                templateCopy[i][j] = template[i][j];
+            }
+        }
+        for(int i=0;i<template.length;i++) {
+            for(int j=0;j<template[i].length;j++) {
+                template[i][j] = templateCopy[j][template.length-1-i];
+            }
+        }
+        return template;
+    }
+    
+       
 
     // Check if a position is within the grid bounds
     private static boolean isInBounds(int[][] grid, int x, int y) {
         return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
     }
+
 
     // Reconstruct the path by backtracking from the goal
     private static List<int[]> reconstructPath(Node node) {
@@ -119,39 +300,10 @@ public class Grid {
         }
         Collections.reverse(path);  // Path should be from start to goal
         return path;
+
     }
 
-    // Pixels per cell in grid.
-    private static final int CELL_SIZE = 64;
 
-    // Size of grid.
-    private static final int SIZE = 15;
-
-    private static int[][] grid = new int[SIZE][SIZE];
-    
-    /**
-     * Grid.
-     */
-    public static void generateGrid() {
-        int[][] newg = 
-        {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-         {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
-
-         grid = newg;
-    }
 
     /**
      * Check if a coordinate on the grid is within a wall.
