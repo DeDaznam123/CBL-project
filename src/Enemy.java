@@ -13,8 +13,6 @@ public class Enemy {
     protected double nextX;
     protected double nextY;
 
-    protected boolean firstTime = true;
-
     protected int scoreValue;
     protected int damage;
     protected double orientation;
@@ -39,12 +37,6 @@ public class Enemy {
         this.damage = 1;
         this.health = 100;
 
-        oldEnd = new int[]{(int) player.getX() / Grid.getCellSize(),
-            (int) player.getY() / Grid.getCellSize()};
-        int[] start = {(int) x / Grid.getCellSize(), (int) y / Grid.getCellSize()};
-        Grid.performAStar(start, oldEnd);
-
-        firstTime = false;
     }
 
     public void move() {
@@ -90,7 +82,6 @@ public class Enemy {
         return a + t * (b - a);
     }
 
-
     public int getSize() {
         return this.size;
     }
@@ -129,6 +120,10 @@ public class Enemy {
             x = rand.nextInt(gridSize * cellSize);
             y = rand.nextInt(gridSize * cellSize);
         } while (Grid.isInWall(x, y));
+
+        path.clear();
+        oldEnd = null;
+        counter = 0;
     }
 
     public double getX() {
