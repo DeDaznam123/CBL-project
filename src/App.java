@@ -1,5 +1,8 @@
 import java.awt.*;
 import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
 
 /**
  * Main JPanel.
@@ -7,37 +10,41 @@ import javax.swing.*;
 public class App extends JPanel implements Runnable {
 
     // Dimensions of the Projection Plane (pixels).
-    public static final int WIDTH  = 1537;
-    public static final int HEIGHT  = 795;
+    public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    public static final int WIDTH = (int) screenSize.getWidth();
+    public static final int HEIGHT = (int) screenSize.getHeight();
 
-    public static final Font FONT = new Font(Font.SANS_SERIF, Font.BOLD, 15);
+    // Font for all text in UI.
+    private static final Font FONT = new Font(Font.SANS_SERIF, Font.BOLD, 15);
     
-    // planeCenter / tan(FOV / 2)
+    // Distance between the player and the projection plane.
     private static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 
         / Math.tan(Math.toRadians(Player.getFOV()) / 2));
-
     // How much to rotate after each ray cast.
     private static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
 
     private Player player = new Player(100, 100);
     private Enemy enemy = new Enemy(player);
-    
+    private static boolean paused = false;
+
+    // FPS goal.
     private static final int FPS = 60;
     private static final double TIME_PER_FRAME = 1000000000 / FPS;
 
-    private long lastTime = System.nanoTime();   // To track time between frames
-
-    // Variables for FPS counter
-    private int frames = 0;
-    private long fpsTimer = System.nanoTime();  // Timer to reset every second
-    private int fps = 0;  // Store calculated FPS
-
-    boolean paused = false;
+    // Variables for FPS counter.
+    private static long fpsTimer = System.nanoTime();  // Timer to reset every second
+    private static long lastTime = System.nanoTime();   // To track time between frames
+    private static int frames = 0;
+    private static int fps = 0;
 
     // KeyHandler.
     InputHandler inputHandler = new InputHandler();
-
     Thread gameThread;
+
+    // Texture of the skydome.
+    private BufferedImage skyTexture;
+    private int skyWidth;
+
 
     /**
      * App constructor.
@@ -47,6 +54,16 @@ public class App extends JPanel implements Runnable {
         this.addKeyListener(inputHandler);
         this.addMouseListener(inputHandler);
         this.setFocusable(true);
+
+        // Load textures.
+        try {
+            skyTexture = ImageIO.read(new File("resources/sky3.png"));
+            skyWidth = skyTexture.getWidth();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         startGame();
     }
 
@@ -111,7 +128,6 @@ public class App extends JPanel implements Runnable {
             player.takeDamage(enemy.getDamage());
         } else {
             enemy.move();
-            System.out.println("Enemy at: " + enemy.getX() + ", " + enemy.getY());
         }
     }
     
@@ -152,8 +168,9 @@ public class App extends JPanel implements Runnable {
         Graphics2D g2d = (Graphics2D) g;
 
         // Draw world and enemy.
-        drawMap(g2d);
-        drawEnemy(g2d, enemy, player);
+        drawSky(g2d);
+        drawWalls(g2d);
+        drawEnemy(g2d);
 
         // Draw UI.
         drawMiniMap(g2d);
@@ -161,6 +178,21 @@ public class App extends JPanel implements Runnable {
         drawScore(g2d);
         drawHealthBar(g2d);
         drawCursor(g2d);
+    }
+
+    public void drawSky(Graphics2D g2d) {
+        int halfHeight = HEIGHT;
+
+        // How much to offset the texture depending on player orientation.
+        int offset = (int) ((-player.getOrientation() / (2 * Math.PI)) * skyWidth);
+        if (offset < 0) {
+            offset += skyWidth;
+        }
+
+        // Draw the sky texture with wrapping
+        for (int x = -offset; x < WIDTH; x += skyWidth) {
+            g2d.drawImage(skyTexture, x, 0, skyWidth, halfHeight, null);
+        }
     }
 
     /**
@@ -213,23 +245,20 @@ public class App extends JPanel implements Runnable {
     }
 
     /**
-     * Draws the 2D top down map.
+     * Draws the raycasted walls.
      * @param g2d Graphics2D.
      */
-    public void drawMap(Graphics2D g2d) {
+    public void drawWalls(Graphics2D g2d) {
         double distance;
         double projectedHeight;
-        
-        g2d.setColor(new Color(90, 90, 200));
-        g2d.fillRect(0, 0, WIDTH, HEIGHT / 2);
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
-        
         double[] distanceTypes;
 
-        for (int i = 0; i < WIDTH; i++) {
+        // Draw floor.
+        g2d.setColor(new Color(146,71,56));
+        g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
 
-            distanceTypes = player.castRay(i);
+        for (int x = 0; x < WIDTH; x++) {
+            distanceTypes = player.castRay(x);
 
             if (distanceTypes[0] < distanceTypes[1]) {
                 distance = distanceTypes[0];
@@ -240,8 +269,10 @@ public class App extends JPanel implements Runnable {
             }
 
             projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
-            g2d.fillRect(i, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
+            g2d.fillRect(x, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
         }
+
+
     }
 
     /**
@@ -280,7 +311,7 @@ public class App extends JPanel implements Runnable {
      * @param player Player.
      */
     
-    public void drawEnemy(Graphics2D g2d, Enemy enemy, Player player) {
+    public void drawEnemy(Graphics2D g2d) {
 
         // Calculate distance from player to enemy
         double deltaX = enemy.getX() - player.getX();

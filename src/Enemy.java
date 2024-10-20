@@ -115,11 +115,16 @@ public class Enemy {
         Random rand = new Random();
         int gridSize = Grid.getSize();
         int cellSize = Grid.getCellSize();
-        
+        int spawnX;
+        int spawnY;
+
         do {
-            x = rand.nextInt(gridSize * cellSize);
-            y = rand.nextInt(gridSize * cellSize);
-        } while (Grid.isInWall(x, y));
+            spawnX = rand.nextInt(gridSize * cellSize);
+            spawnY = rand.nextInt(gridSize * cellSize);
+        } while (Grid.isInWall(spawnX, spawnY));
+
+        x = spawnX;
+        y = spawnY;
 
         path.clear();
         oldEnd = null;

@@ -1,3 +1,4 @@
+import java.util.Random;
 
 /**
  * Player.
@@ -219,7 +220,33 @@ public class Player {
     }   
 
     public void takeDamage(int damage) {
+        if (health - damage <= 0) {
+            respawn();
+            return;
+        }
+
         health -= damage;
+    }
+
+    public void respawn() {
+        health = 100;
+        score = 0;
+
+        Random rand = new Random();
+        int gridSize = Grid.getSize();
+        int cellSize = Grid.getCellSize();
+        int spawnX;
+        int spawnY;
+
+        do {
+            spawnX = rand.nextInt(gridSize * cellSize);
+            spawnY = rand.nextInt(gridSize * cellSize);
+        } while (Grid.isInWall(spawnX, spawnY));
+
+        x = spawnX;
+        y = spawnY;
+
+
     }
 
     public int getScore() {
