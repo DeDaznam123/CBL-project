@@ -1,7 +1,6 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
-
 import javax.imageio.ImageIO;
 
 /**
@@ -20,7 +19,7 @@ public class Enemy {
     protected int scoreValue;
     protected int damage;
     protected double orientation;
-    protected int size = 16;
+    protected int size = 32;
 
     protected Player player;
     protected boolean aimedAt = false;
@@ -72,6 +71,9 @@ public class Enemy {
         return texture;
     }
 
+    /**
+     * Move the enemy towards the player.
+     */
     public void move() {
         int cellSize = Grid.getCellSize();
     

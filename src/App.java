@@ -1,9 +1,8 @@
 import java.awt.*;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-
 import javax.imageio.ImageIO;
+import javax.swing.*;
 
 /**
  * Main JPanel.
@@ -186,11 +185,16 @@ public class App extends JPanel implements Runnable {
         drawCursor(g2d);
     }
 
+    /**
+     * Draws the sky texture.
+     * @param g2d Graphics2D.
+     */
     public void drawSky(Graphics2D g2d) {
         int halfHeight = HEIGHT;
 
         // How much to offset the texture depending on player orientation.
-        int offset = (int) ((player.getOrientation() / (2 * Math.PI)) * skyWidth * (360.0 / Player.getFOV()) % skyWidth);
+        int offset = (int) ((player.getOrientation() / (2 * Math.PI)) * skyWidth 
+            * (360.0 / Player.getFOV()) % skyWidth);
     
         if (offset < 0) {
             offset += skyWidth;
@@ -260,7 +264,7 @@ public class App extends JPanel implements Runnable {
         int textureX;
 
         // Draw floor.
-        g2d.setColor(new Color(146,136,62));
+        g2d.setColor(new Color(146, 136, 62));
         g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
         
         for (int x = 0; x < WIDTH; x++) {
@@ -340,10 +344,7 @@ public class App extends JPanel implements Runnable {
     /**
      * Draws the enemy on the screen in a 2.5D raycasted style.
      * @param g2d Graphics2D.
-     * @param enemy Enemy.
-     * @param player Player.
      */
-    
     public void drawEnemy(Graphics2D g2d) {
 
         // Calculate distance from player to enemy
@@ -372,7 +373,7 @@ public class App extends JPanel implements Runnable {
             (WIDTH / 2 + Math.tan(relativeAngle) * DISTANCE_PLAYER_TO_PLANE);
         // Adjust size based on distance
         int enemySize = (int) 
-            (16 / distance * DISTANCE_PLAYER_TO_PLANE); 
+            (enemy.getSize() / distance * DISTANCE_PLAYER_TO_PLANE); 
 
         // Draw the enemy as a rectangle
         int adjustedX = enemyScreenX - enemySize / 2;
