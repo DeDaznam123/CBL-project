@@ -16,16 +16,19 @@ public class Player {
     // Value of pi.
     private static final double PI = Math.PI;
 
+    // Distance at which player collides with a wall.
+    private static final int HITBOX_SIZE = 5;
+
     // Position of the player.
     private double x;
     private double y;
 
+    // Orientation in radians relative to absolute east (like unit circle).
+    private double orientation;
+
     // Health and score of the player.
     private int health;
     private int score;
-
-    // Orientation in radians relative to absolute east (like unit circle).
-    private double orientation;
 
     private double rayAngle;
 
@@ -46,7 +49,7 @@ public class Player {
         }
     }
 
-    public double castForHorizontalDistance(double rayAngle) {
+    public double[] castForHorizontalDistance(double rayAngle) {
         double aTan = -1 / Math.tan(rayAngle);
         double xIntercept = 0;
         double yIntercept = 0;
@@ -89,11 +92,12 @@ public class Player {
                 depth++;
             }
         }
-
-        return Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept));
+        
+        double[] result = {Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept)), xIntercept, yIntercept};
+        return result;
     }
 
-    public double castForVerticalDistance(double rayAngle) {
+    public double[] castForVerticalDistance(double rayAngle) {
         double nTan = -Math.tan(rayAngle);
         double xIntercept = 0;
         double yIntercept = 0;
@@ -137,14 +141,15 @@ public class Player {
             }
         }
 
-        return Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept));
+        double[] result = {Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept)), xIntercept, yIntercept};
+        return result;
     }
 
     // Cast one ray from the player.
-    public double[] castRay(double i) {
+    public double[][] castRay(double i) {
 
         // Angle of the ray.
-        rayAngle = orientation + (PI / 6) - (i * App.getAngleIncrement());
+        rayAngle = orientation - (PI / 6) + (i * App.getAngleIncrement());
         rayAngle = (rayAngle + 2 * PI) % (2 * PI);
         
         // Avoid values where tan is Undefined and avoid division by 0
@@ -153,41 +158,53 @@ public class Player {
         }
         
         // Check horizontal Lines and vertical lines
-        double distH = castForHorizontalDistance(rayAngle);
-        double distV = castForVerticalDistance(rayAngle);
+        double[] distH = castForHorizontalDistance(rayAngle);
+        double[] distV = castForVerticalDistance(rayAngle);
 
-        return new double[] {distH, distV};
+        return new double[][] {distH, distV};
     }
 
     public void moveForward() {
         double newPosX = x + Math.cos(orientation) * speedMultiplier;
         double newPosY = y + Math.sin(orientation) * speedMultiplier;
-        if (!Grid.isInWall(newPosX, newPosY)) {
+    
+        // Check for collision along the x-axis (including the hitbox).
+        if (!Grid.isInWall(newPosX + Math.signum(Math.cos(orientation)) * HITBOX_SIZE, y)) {
             x = newPosX;
+        }
+    
+        // Check for collision along the y-axis (including the hitbox).
+        if (!Grid.isInWall(x, newPosY + Math.signum(Math.sin(orientation)) * HITBOX_SIZE)) {
             y = newPosY;
         }
     }
-
+    
     public void moveBackward() {
         double newPosX = x - Math.cos(orientation) * speedMultiplier;
         double newPosY = y - Math.sin(orientation) * speedMultiplier;
-        if (!Grid.isInWall(newPosX, newPosY)) {
+    
+        // Check for collision along the x-axis (including the hitbox).
+        if (!Grid.isInWall(newPosX - Math.signum(Math.cos(orientation)) * HITBOX_SIZE, y)) {
             x = newPosX;
+        }
+    
+        // Check for collision along the y-axis (including the hitbox).
+        if (!Grid.isInWall(x, newPosY - Math.signum(Math.sin(orientation)) * HITBOX_SIZE)) {
             y = newPosY;
         }
     }
 
     public void rotateLeft() {
-        orientation += ROTATION_INCREMENT;
-        if (orientation > (2 * PI)) {
-            orientation -= 2 * PI;
+        orientation -= ROTATION_INCREMENT;
+        if (orientation < 0) {
+            orientation += 2 * PI;
         }
     }
 
     public void rotateRight() {
-        orientation -= ROTATION_INCREMENT;
-        if (orientation < 0) {
-            orientation += 2 * PI;
+        orientation += ROTATION_INCREMENT;
+        if (orientation > (2 * PI)) {
+            orientation -= 2 * PI;
         }
     }
 

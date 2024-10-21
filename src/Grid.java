@@ -169,6 +169,18 @@ public class Grid {
         return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
 
+    // Reconstruct the path by backtracking from the goal
+    private static List<int[]> reconstructPath(Node node) {
+        List<int[]> path = new ArrayList<>();
+        while (node != null) {
+            path.add(new int[]{node.x, node.y});
+            node = node.parent;
+        }
+        Collections.reverse(path);  // Path should be from start to goal
+        return path;
+
+    }
+
     /**
      * Perform A* search to find the shortest path from start to goal.
      * @param start Start coordinates.
@@ -243,8 +255,6 @@ public class Grid {
         useTemplate(templateType3[randomnumber], 3, 10, 20);
         randomnumber = (int) (Math.random() * 3);
         useTemplate(templateType2[randomnumber], 2, 20, 20);
-        
-
     }
 
     private static void useTemplate(int[][] template, int rotation, int x, int y) {
@@ -282,18 +292,6 @@ public class Grid {
     // Check if a position is within the grid bounds
     private static boolean isInBounds(int[][] grid, int x, int y) {
         return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
-    }
-
-    // Reconstruct the path by backtracking from the goal
-    private static List<int[]> reconstructPath(Node node) {
-        List<int[]> path = new ArrayList<>();
-        while (node != null) {
-            path.add(new int[]{node.x, node.y});
-            node = node.parent;
-        }
-        Collections.reverse(path);  // Path should be from start to goal
-        return path;
-
     }
 
     /**

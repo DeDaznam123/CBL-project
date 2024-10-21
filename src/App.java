@@ -2,6 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+
 import javax.imageio.ImageIO;
 
 /**
@@ -20,6 +21,7 @@ public class App extends JPanel implements Runnable {
     // Distance between the player and the projection plane.
     private static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 
         / Math.tan(Math.toRadians(Player.getFOV()) / 2));
+
     // How much to rotate after each ray cast.
     private static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
 
@@ -41,10 +43,12 @@ public class App extends JPanel implements Runnable {
     InputHandler inputHandler = new InputHandler();
     Thread gameThread;
 
-    // Texture of the skydome.
+    // Textures.
     private BufferedImage skyTexture;
     private int skyWidth;
 
+    private BufferedImage wallTexture;
+    private int wallTextureWidth;
 
     /**
      * App constructor.
@@ -57,8 +61,10 @@ public class App extends JPanel implements Runnable {
 
         // Load textures.
         try {
-            skyTexture = ImageIO.read(new File("resources/sky3.png"));
+            skyTexture = ImageIO.read(new File("resources/sky_textures/sky2.png"));
             skyWidth = skyTexture.getWidth();
+            wallTexture = ImageIO.read(new File("resources/wall_textures/brick2.png"));
+            wallTextureWidth = wallTexture.getWidth();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +190,7 @@ public class App extends JPanel implements Runnable {
         int halfHeight = HEIGHT;
 
         // How much to offset the texture depending on player orientation.
-        int offset = (int) ((-player.getOrientation() / (2 * Math.PI)) * skyWidth * (360.0 / Player.getFOV()) % skyWidth);
+        int offset = (int) ((player.getOrientation() / (2 * Math.PI)) * skyWidth * (360.0 / Player.getFOV()) % skyWidth);
     
         if (offset < 0) {
             offset += skyWidth;
@@ -251,29 +257,39 @@ public class App extends JPanel implements Runnable {
      */
     public void drawWalls(Graphics2D g2d) {
         double distance;
-        double projectedHeight;
-        double[] distanceTypes;
+        int textureX;
 
         // Draw floor.
-        g2d.setColor(new Color(146,71,56));
+        g2d.setColor(new Color(146,136,62));
         g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
-
+        
         for (int x = 0; x < WIDTH; x++) {
-            distanceTypes = player.castRay(x);
+            double[][] distanceTypes = player.castRay(x);
 
-            if (distanceTypes[0] < distanceTypes[1]) {
-                distance = distanceTypes[0];
+            if (distanceTypes[0][0] < distanceTypes[1][0]) {
+                distance = distanceTypes[0][0];
+                textureX = (int) distanceTypes[0][1] % wallTextureWidth;
+
                 g2d.setColor(new Color(80, 80, 80));
             } else {
-                distance = distanceTypes[1];
+                distance = distanceTypes[1][0];
+                textureX = (int) distanceTypes[1][2] % wallTextureWidth;
                 g2d.setColor(new Color(100, 100, 100));
             }
 
-            projectedHeight = 64 / distance * DISTANCE_PLAYER_TO_PLANE;
-            g2d.fillRect(x, (int) (HEIGHT - projectedHeight) / 2, 1, (int) projectedHeight);
+            int projectedHeight = (int) (64 / distance * DISTANCE_PLAYER_TO_PLANE);
+            int drawStart = (int) ((HEIGHT / 2) - (projectedHeight / 2));
+            int drawEnd = (int) (drawStart + projectedHeight);
+            
+            g2d.drawImage(
+                wallTexture,  // Image object for the wall texture
+                x, drawStart, 
+                x + 1, drawEnd,  // Position on the screen to draw
+                textureX, 0, 
+                textureX + 1, wallTexture.getHeight(),  // Texture slice to draw
+                null  
+            );
         }
-
-
     }
 
     /**
@@ -286,6 +302,7 @@ public class App extends JPanel implements Runnable {
 
         g2d.setColor(Color.WHITE);
         g2d.fillRect(24, 24, 151, 151);
+        g2d.setColor(Color.BLACK);
         
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -352,7 +369,7 @@ public class App extends JPanel implements Runnable {
 
         // Project enemy onto screen
         int enemyScreenX = (int) 
-            (WIDTH / 2 + Math.tan(relativeAngle) * DISTANCE_PLAYER_TO_PLANE * -1);
+            (WIDTH / 2 + Math.tan(relativeAngle) * DISTANCE_PLAYER_TO_PLANE);
         // Adjust size based on distance
         int enemySize = (int) 
             (16 / distance * DISTANCE_PLAYER_TO_PLANE); 
@@ -361,21 +378,21 @@ public class App extends JPanel implements Runnable {
         int adjustedX = enemyScreenX - enemySize / 2;
         int adjustedY = HEIGHT / 2 - enemySize / 2;
 
-        if (distance > Math.min(player.castRay(adjustedX + enemySize / 2)[0],
-            player.castRay(adjustedX + enemySize / 2)[1])) {
+        if (distance > Math.min(player.castRay(adjustedX + enemySize / 2)[0][0],
+            player.castRay(adjustedX + enemySize / 2)[1][0])) {
             return;
         }
 
-        g2d.setColor(Color.RED);
-        g2d.fillRect(adjustedX, adjustedY, enemySize, enemySize);
-
+        // Draw enemy.
+        g2d.drawImage(enemy.getTexture(), adjustedX, adjustedY, enemySize, enemySize, null);
+        
         if (enemyScreenX < WIDTH / 2 + enemySize / 2 && enemyScreenX > WIDTH / 2 - enemySize / 2) {
             enemy.setAimedAt(true);
         } else {
             enemy.setAimedAt(false);
         }
         
-        // Enemy health bar.
+        // Draw enemy health bar.
         int healthBarWidth = 30;
         int healthBarHeight = 5;
         int healthBarX = enemyScreenX - healthBarWidth / 2;

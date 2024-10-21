@@ -1,4 +1,8 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.*;
+
+import javax.imageio.ImageIO;
 
 /**
  * Enemy class.
@@ -21,10 +25,15 @@ public class Enemy {
     protected Player player;
     protected boolean aimedAt = false;
 
+    protected int enemyTextureIndex;
+
     List<int[]> path = new ArrayList<int[]>();
     int counter;
 
     int[] oldEnd;
+
+    private static BufferedImage[] enemyTextures;
+    private BufferedImage texture;
 
     /**
      * Enemy constructor.
@@ -36,7 +45,31 @@ public class Enemy {
         this.player = player;
         this.damage = 1;
         this.health = 100;
+    }
 
+    // Static initializer for enemy textures.
+    static {
+        try {
+            // Read all enemy textures into files.
+            File[] files = (new File("resources/enemy_textures")).listFiles(
+                (dir, name) -> (name.endsWith(".png"))
+            );
+
+            // Turn the files into BufferedImages.
+            enemyTextures = new BufferedImage[files.length];
+            for (int i = 0; i < files.length; i++) {
+
+                enemyTextures[i] = ImageIO.read(files[i]);
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public BufferedImage getTexture() {
+        return texture;
     }
 
     public void move() {
@@ -78,6 +111,10 @@ public class Enemy {
         }
     }
 
+    public int getEnemyTextureIndex() {
+        return enemyTextureIndex;
+    }
+
     public static double lerp(double a, double b, double t) {
         return a + t * (b - a);
     }
@@ -113,6 +150,7 @@ public class Enemy {
         player.addScore(scoreValue);
 
         Random rand = new Random();
+        texture = enemyTextures[rand.nextInt(enemyTextures.length)];
         int gridSize = Grid.getSize();
         int cellSize = Grid.getCellSize();
         int spawnX;
