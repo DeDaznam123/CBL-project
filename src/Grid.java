@@ -155,6 +155,7 @@ public class Grid {
         
     // Pixels per cell in grid.
     private static final int CELL_SIZE = 64;
+
     // Directions for moving in the 4 cardinal directions (up, down, left, right)
     private static final int[][] DIRECTIONS = {
         {0, 1},  // Right
@@ -163,14 +164,10 @@ public class Grid {
         {-1, 0}  // Upconflicts
     };
 
-    // Node class to represent each grid point
-    
-
     // Heuristic function (Manhattan distance)
     private static int heuristic(int x1, int y1, int x2, int y2) {
         return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
-
 
     /**
      * Perform A* search to find the shortest path from start to goal.
@@ -223,10 +220,9 @@ public class Grid {
 
             }
         }
-     // No path found, return an empty list
-     return new ArrayList<>();
- }
-
+        // No path found, return an empty list
+        return new ArrayList<>();
+    }
 
     public static void generateGrid() {
         int randomnumber = (int) (Math.random() * 3);
@@ -283,13 +279,10 @@ public class Grid {
         return template;
     }
     
-       
-
     // Check if a position is within the grid bounds
     private static boolean isInBounds(int[][] grid, int x, int y) {
         return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
     }
-
 
     // Reconstruct the path by backtracking from the goal
     private static List<int[]> reconstructPath(Node node) {
@@ -302,8 +295,6 @@ public class Grid {
         return path;
 
     }
-
-
 
     /**
      * Check if a coordinate on the grid is within a wall.

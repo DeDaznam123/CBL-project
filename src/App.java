@@ -184,7 +184,8 @@ public class App extends JPanel implements Runnable {
         int halfHeight = HEIGHT;
 
         // How much to offset the texture depending on player orientation.
-        int offset = (int) ((-player.getOrientation() / (2 * Math.PI)) * skyWidth);
+        int offset = (int) ((-player.getOrientation() / (2 * Math.PI)) * skyWidth * (360.0 / Player.getFOV()) % skyWidth);
+    
         if (offset < 0) {
             offset += skyWidth;
         }
@@ -295,13 +296,28 @@ public class App extends JPanel implements Runnable {
                 }
             }
         }
+        // Draw player position
+        int playerX = scaleToMiniMap(player.getX());
+        int playerY = scaleToMiniMap(player.getY());
+        int enemyX = scaleToMiniMap(enemy.getX());
+        int enemyY = scaleToMiniMap(enemy.getY());
 
-        g2d.fillRect((int) (player.getX() / (64 / (150 / (double) size))) + 25,
-            (int) (player.getY() / (64 / (150 / (double) size))) + 25, 3, 3);
-        
+        // Draw player.
+        g2d.fillRect(playerX, playerY, 3, 3);
+
+        // Draw player direction.
+        int indicatorX = (int) (playerX + 10 * Math.cos(player.getOrientation()));
+        int indicatorY = (int) (playerY + 10 * Math.sin(player.getOrientation()));
+        g2d.setColor(Color.RED);
+        g2d.drawLine(playerX + 1, playerY + 1, indicatorX + 1, indicatorY + 1);
+
+        // Draw enemy.
         g2d.setColor(Color.ORANGE);
-        g2d.fillRect((int) (enemy.getX() /  (64 / (150 / (double) size))) + 25,
-            (int) (enemy.getY() / (64 / (150 / (double) size))) + 25, 3, 3);
+        g2d.fillRect(enemyX, enemyY, 3, 3);
+    }
+
+    public int scaleToMiniMap(double x) {
+        return (int) (x / (Grid.getCellSize() / (150 / (double) Grid.getSize()))) + 25;
     }
     
     /**
