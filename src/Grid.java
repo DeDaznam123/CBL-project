@@ -39,119 +39,122 @@ public class Grid {
     private static final int SIZE = 30;
     private static int[][] grid = new int[SIZE][SIZE];
 
-    private final static int[][][] templateType1 = {
-        {{1,1,1,1,0,0,1,1,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,1,1,0,1,1,1,0,1},
-         {1,0,1,0,0,0,0,1,0,1},
-         {0,0,0,0,1,1,0,0,0,0},
-         {0,0,1,0,1,1,0,1,0,0},
-         {1,0,1,0,0,0,0,1,0,1},
-         {1,0,1,1,0,1,1,1,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+    private static final int[][][] TEMPLATE_TYPE_1 = {
+        {
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 0, 1, 1, 1, 0, 1},
+            {1, 0, 1, 0, 0, 0, 0, 1, 0, 1},
+            {0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+            {0, 0, 1, 0, 1, 1, 0, 1, 0, 0},
+            {1, 0, 1, 0, 0, 0, 0, 1, 0, 1},
+            {1, 0, 1, 1, 0, 1, 1, 1, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         },
-       
-        {{1,1,1,1,0,0,1,1,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,1,1,0,0,1,1,0,1},
-         {1,0,1,1,0,0,1,1,0,1},
-         {0,0,0,0,0,0,0,0,0,0},
-         {0,0,0,0,0,0,0,0,0,0},
-         {1,0,1,1,0,0,1,1,0,1},
-         {1,0,1,1,0,0,1,1,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+        {
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         },
-
-        {{1,1,1,1,0,0,1,1,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,0,1,1,1,1,0,0,1},
-         {0,0,0,1,1,1,1,0,0,0},
-         {0,0,0,1,1,1,1,0,0,0},
-         {1,0,0,1,1,1,1,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+        {
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 1, 1, 1, 1, 0, 0, 1},
+            {0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+            {0, 0, 0, 1, 1, 1, 1, 0, 0, 0},
+            {1, 0, 0, 1, 1, 1, 1, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         }
     };
-
-    private final static int[][][] templateType2 = {
-        {{1,1,1,1,1,1,1,1,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,1,1,1,1,1,0,0,1},
-         {1,0,1,0,0,0,0,0,0,1},
-         {1,0,1,0,0,0,0,0,0,0},
-         {1,0,1,0,0,1,1,0,0,0},
-         {1,0,1,0,0,1,1,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+    
+    private static final int[][][] TEMPLATE_TYPE_2 = {
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 1, 1, 1, 0, 0, 1},
+            {1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+            {1, 0, 1, 0, 0, 1, 1, 0, 0, 0},
+            {1, 0, 1, 0, 0, 1, 1, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         },
-
-        {{1,1,1,1,1,1,1,1,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,1,1,1,0,0,0,0,1},
-         {1,0,1,1,1,0,0,0,0,1},
-         {1,0,1,1,0,0,0,0,0,0},
-         {1,0,0,0,0,0,1,1,0,0},
-         {1,0,0,0,0,1,1,1,0,1},
-         {1,0,0,0,0,1,1,1,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 1, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 1, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 0, 0, 0, 0, 0, 0},
+            {1, 0, 0, 0, 0, 0, 1, 1, 0, 0},
+            {1, 0, 0, 0, 0, 1, 1, 1, 0, 1},
+            {1, 0, 0, 0, 0, 1, 1, 1, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         },
-
-        {{1,1,1,1,1,1,1,1,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,0,1,1,1,1,0,0,1},
-         {1,0,1,1,1,1,1,1,0,1},
-         {1,0,1,1,1,1,1,1,0,0},
-         {1,0,1,1,1,1,1,1,0,0},
-         {1,0,1,1,1,1,1,1,0,1},
-         {1,0,0,1,1,1,1,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 0, 1, 1, 1, 1, 0, 0, 1},
+            {1, 0, 1, 1, 1, 1, 1, 1, 0, 1},
+            {1, 0, 1, 1, 1, 1, 1, 1, 0, 0},
+            {1, 0, 1, 1, 1, 1, 1, 1, 0, 0},
+            {1, 0, 1, 1, 1, 1, 1, 1, 0, 1},
+            {1, 0, 0, 1, 1, 1, 1, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         }
     };
-
-    private final static int[][][] templateType3 = {
-        {{1,1,1,1,1,1,1,1,1,1},
-         {1,1,0,0,0,0,0,0,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,1,1,0,0,1,1,0,1},
-         {0,0,0,0,0,0,0,0,0,0},
-         {0,0,0,0,0,0,0,0,0,0},
-         {1,0,1,1,0,0,1,1,0,1},
-         {1,0,0,1,0,0,1,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+    
+    private static final int[][][] TEMPLATE_TYPE_3 = {
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {1, 0, 0, 1, 0, 0, 1, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         },
-
-        {{1,1,1,1,1,1,1,1,1,1},
-         {1,1,1,1,1,1,1,1,1,1},
-         {1,1,1,1,1,1,1,1,1,1},
-         {1,1,1,1,1,1,1,1,1,1},
-         {0,0,0,0,0,0,0,0,0,0},
-         {0,0,0,0,0,0,0,0,0,0},
-         {1,1,1,1,0,0,1,1,1,1},
-         {1,1,1,1,0,0,1,1,1,1},
-         {1,1,1,1,0,0,1,1,1,1},
-         {1,1,1,1,0,0,1,1,1,1}
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         },
-
-        {{1,1,1,1,1,1,1,1,1,1},
-         {1,1,0,0,0,0,0,0,1,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,0,1,1,0,0,1,1,0,1},
-         {0,0,1,1,0,0,1,1,0,0},
-         {0,0,1,1,0,0,1,1,0,0},
-         {1,0,1,1,0,0,1,1,0,1},
-         {1,0,0,1,0,0,1,0,0,1},
-         {1,0,0,0,0,0,0,0,0,1},
-         {1,1,1,1,0,0,1,1,1,1}
+        {
+            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {0, 0, 1, 1, 0, 0, 1, 1, 0, 0},
+            {0, 0, 1, 1, 0, 0, 1, 1, 0, 0},
+            {1, 0, 1, 1, 0, 0, 1, 1, 0, 1},
+            {1, 0, 0, 1, 0, 0, 1, 0, 0, 1},
+            {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 1, 0, 0, 1, 1, 1, 1}
         }
-    };
+    };    
         
     // Pixels per cell in grid.
     private static final int CELL_SIZE = 64;
@@ -192,7 +195,7 @@ public class Grid {
         Map<String, Node> allNodes = new HashMap<>();
         // Start node
         Node startNode = new Node(start[0], start[1], 0,
-        heuristic(start[0], start[1], goal[0], goal[1]), null);
+            heuristic(start[0], start[1], goal[0], goal[1]), null);
         openSet.add(startNode);
         allNodes.put(start[0] + "," + start[1], startNode);
 
@@ -229,47 +232,90 @@ public class Grid {
                         }
                     }
                 }
-
             }
         }
         // No path found, return an empty list
         return new ArrayList<>();
     }
 
+    /**
+     * Generate the grid.
+     */
     public static void generateGrid() {
         int randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType2[1], 0, 0, 0);
+        useTemplate(TEMPLATE_TYPE_2[1], 0, 0, 0);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType3[randomnumber], 1, 10, 0);
+        useTemplate(TEMPLATE_TYPE_3[randomnumber], 1, 10, 0);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType2[1], 1, 20, 0);
+        useTemplate(TEMPLATE_TYPE_2[1], 1, 20, 0);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType3[randomnumber], 0, 0, 10);
+        useTemplate(TEMPLATE_TYPE_3[randomnumber], 0, 0, 10);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType1[randomnumber], 0, 10, 10);
+        useTemplate(TEMPLATE_TYPE_1[randomnumber], 0, 10, 10);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType3[randomnumber], 2, 20, 10);
+        useTemplate(TEMPLATE_TYPE_3[randomnumber], 2, 20, 10);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType2[randomnumber], 3, 0, 20);
+        useTemplate(TEMPLATE_TYPE_2[randomnumber], 3, 0, 20);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType3[randomnumber], 3, 10, 20);
+        useTemplate(TEMPLATE_TYPE_3[randomnumber], 3, 10, 20);
         randomnumber = (int) (Math.random() * 3);
-        useTemplate(templateType2[randomnumber], 2, 20, 20);
+        useTemplate(TEMPLATE_TYPE_2[randomnumber], 2, 20, 20);
     }
 
+    /**
+     * Uses a template to modify the grid at a specified position with a specified rotation.
+     * @param template The template to use.
+     * @param rotation The number of 90-degree rotations to apply to the template.
+     * @param x The x coordinate on the grid.
+     * @param y The y coordinate on the grid.
+     */
     private static void useTemplate(int[][] template, int rotation, int x, int y) {
-        int[][] templateCopy = new int[template.length][template[0].length]; 
+        int[][] templateCopy = copyTemplate(template);
+
+        templateCopy = rotateTemplate(templateCopy, rotation);
+
+        applyTemplateToGrid(templateCopy, x, y);
+    }
+
+    /**
+     * Copies the template to a new 2D array.
+     * @param template The template to copy.
+     * @return The copied template.
+     */
+    private static int[][] copyTemplate(int[][] template) {
+        int[][] templateCopy = new int[template.length][template[0].length];
         for (int i = 0; i < template.length; i++) {
             for (int j = 0; j < template[i].length; j++) {
                 templateCopy[i][j] = template[i][j];
             }
         }
-        for(int i=0;i<rotation;i++) {
-            templateCopy=rotate(templateCopy);
+        return templateCopy;
+    }
+
+    /**
+     * Rotates the template a specified number of times.
+     * @param template The template to rotate.
+     * @param rotation The number of 90-degree rotations to apply.
+     * @return The rotated template.
+     */
+    private static int[][] rotateTemplate(int[][] template, int rotation) {
+        int[][] rotatedTemplate = template;
+        for (int i = 0; i < rotation; i++) {
+            rotatedTemplate = rotate(rotatedTemplate);
         }
-        for (int i=0;i<templateCopy.length;i++) {
-            for (int j=0;j<templateCopy[i].length;j++) {
-                grid[x+i][y+j] = templateCopy[i][j];
+        return rotatedTemplate;
+    }
+
+    /**
+     * Applies the template to the grid at the specified position.
+     * @param template The template to apply.
+     * @param x The x coordinate on the grid.
+     * @param y The y coordinate on the grid.
+     */
+    private static void applyTemplateToGrid(int[][] template, int x, int y) {
+        for (int i = 0; i < template.length; i++) {
+            for (int j = 0; j < template[i].length; j++) {
+                grid[x + i][y + j] = template[i][j];
             }
         }
     }
@@ -281,9 +327,10 @@ public class Grid {
                 templateCopy[i][j] = template[i][j];
             }
         }
-        for(int i=0;i<template.length;i++) {
-            for(int j=0;j<template[i].length;j++) {
-                template[i][j] = templateCopy[j][template.length-1-i];
+
+        for (int i = 0; i < template.length; i++) {
+            for (int j = 0; j < template[i].length; j++) {
+                template[i][j] = templateCopy[j][template.length - i - 1];
             }
         }
         return template;

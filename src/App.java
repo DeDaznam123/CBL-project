@@ -26,7 +26,6 @@ public class App extends JPanel implements Runnable {
 
     private Player player = new Player(100, 100);
     private Enemy enemy = new Enemy(player);
-    private static boolean paused = false;
 
     // FPS goal.
     private static final int FPS = 60;
@@ -37,6 +36,8 @@ public class App extends JPanel implements Runnable {
     private static long lastTime = System.nanoTime();   // To track time between frames
     private static int frames = 0;
     private static int fps = 0;
+
+    private static boolean paused = false;
 
     // KeyHandler.
     InputHandler inputHandler = new InputHandler();
@@ -83,40 +84,49 @@ public class App extends JPanel implements Runnable {
     public void pauseGame() { }
 
     public void run() {
-        enemy.respawn();
         Grid.generateGrid();
+        enemy.respawn();
 
-        while (gameThread != null) {
-            if (!paused) {
+        while (!paused) {
 
-                // Calculate time elapsed since last frame.
-                long now = System.nanoTime();
-                long elapsed = now - lastTime;
-                lastTime = now;
+            // Calculate time elapsed since last frame.
+            long now = System.nanoTime();
+            long elapsed = now - lastTime;
+            lastTime = now;
 
-                //Update, render, increase frame count.
-                updatePlayer();
-                repaint();
-                frames++;
+            //Update player and enemy
+            updatePlayer();
+            updateEnemy();
+            repaint();
+            frames++;
 
-                // Update enemy position and check if should deal damage.
-                updateEnemy();
-
-                // FPS Calculation every 1 second (1e9 ns).
-                if (now - fpsTimer >= 1e9) {
-                    updateFPS();
-                }
-
-                // If frame finished early, sleep to reach FPS target.
-                if (elapsed < TIME_PER_FRAME) {
-                    try {
-                        Thread.sleep((long) ((TIME_PER_FRAME - elapsed) / 1e6));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }   
-                
+            // FPS Calculation every 1 second (1e9 ns).
+            if (now - fpsTimer >= 1e9) {
+                updateFPS();
             }
+
+            // If frame finished early, sleep to reach FPS target.
+            if (elapsed < TIME_PER_FRAME) {
+                try {
+                    Thread.sleep((long) ((TIME_PER_FRAME - elapsed) / 1e6));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }   
+        }
+    }
+
+    /**
+     * Updates the enemy's aim.
+     * @param g2d Graphics2D.
+     * @param enemyScreenX Screen x-coordinate of the enemy.
+     * @param enemySize Size of the enemy.
+     */
+    public void updateAim(Graphics2D g2d, int enemyScreenX, int enemySize) {
+        if (enemyScreenX < WIDTH / 2 + enemySize / 2 && enemyScreenX > WIDTH / 2 - enemySize / 2) {
+            enemy.setAimedAt(true);
+        } else {
+            enemy.setAimedAt(false);
         }
     }
     
@@ -129,7 +139,7 @@ public class App extends JPanel implements Runnable {
         double deltaY = enemy.getY() - player.getY();
         double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-        if (distance < 32) {
+        if (distance < 64) {
             player.takeDamage(enemy.getDamage());
         } else {
             enemy.move();
@@ -137,9 +147,17 @@ public class App extends JPanel implements Runnable {
     }
     
     /**
-     * Updates the player's position.
+     * Updates the player's position according to keystrokes.
      */
     public void updatePlayer() {
+        handleMovement();
+        handleShooting();
+    }
+
+    /**
+     * Handles player movement.
+     */
+    public void handleMovement() {
         if (inputHandler.wPressed) {
             player.moveForward();
         }
@@ -152,6 +170,12 @@ public class App extends JPanel implements Runnable {
         if (inputHandler.dPressed) {
             player.rotateRight();
         }
+    }
+
+    /**
+     * Handles player shooting.
+     */
+    public void handleShooting() {
         if (inputHandler.mouseClicked) {
             player.shoot(enemy);
             inputHandler.mouseClicked = false;
@@ -355,12 +379,7 @@ public class App extends JPanel implements Runnable {
         // Calculate angle between player's orientation and enemy
         double relativeAngle = Math.atan2(deltaY, deltaX) - player.getOrientation();
         
-        // Normalize angle to be between -PI and PI
-        if (relativeAngle < -Math.PI) {
-            relativeAngle += 2 * Math.PI;
-        } else if (relativeAngle > Math.PI) {
-            relativeAngle -= 2 * Math.PI;
-        }
+        relativeAngle = normalizeAngle(relativeAngle);
 
         // Clamp relative angle to field of view
         double halfFOV = Math.toRadians(Player.getFOV()) / 2;
@@ -379,21 +398,26 @@ public class App extends JPanel implements Runnable {
         int adjustedX = enemyScreenX - enemySize / 2;
         int adjustedY = HEIGHT / 2 - enemySize / 2;
 
-        if (distance > Math.min(player.castRay(adjustedX + enemySize / 2)[0][0],
-            player.castRay(adjustedX + enemySize / 2)[1][0])) {
+        double[][] castResults = player.castRay(adjustedX + enemySize / 2);
+        if (distance > Math.min(castResults[0][0], castResults[1][0])) {
             return;
         }
 
         // Draw enemy.
         g2d.drawImage(enemy.getTexture(), adjustedX, adjustedY, enemySize, enemySize, null);
         
-        if (enemyScreenX < WIDTH / 2 + enemySize / 2 && enemyScreenX > WIDTH / 2 - enemySize / 2) {
-            enemy.setAimedAt(true);
-        } else {
-            enemy.setAimedAt(false);
-        }
+        updateAim(g2d, enemyScreenX, enemySize);
         
-        // Draw enemy health bar.
+        drawEnemyHealthBar(g2d, enemyScreenX, enemySize);
+    }
+
+    /**
+     * Draws the enemy health bar.
+     * @param g2d Graphics2D.
+     * @param enemyScreenX Screen x-coordinate of the enemy.
+     * @param enemySize Size of the enemy.
+     */
+    public void drawEnemyHealthBar(Graphics2D g2d, int enemyScreenX, int enemySize) {
         int healthBarWidth = 30;
         int healthBarHeight = 5;
         int healthBarX = enemyScreenX - healthBarWidth / 2;
@@ -404,7 +428,6 @@ public class App extends JPanel implements Runnable {
         g2d.setColor(Color.GREEN);
         g2d.fillRect(healthBarX, healthBarY, 
             (int) (healthBarWidth * (enemy.health / 100.0)), healthBarHeight);
-
     }
 
     /**
@@ -416,6 +439,22 @@ public class App extends JPanel implements Runnable {
         g2d.setFont(FONT);
         g2d.drawString("Score: " + player.getScore(), 185, 180 + 2 * FONT.getSize());
     }
+    
+    /**
+     * Normalizes an angle to be between -PI and PI.
+     * @param angle Angle to normalize.
+     * @return Normalized angle.
+     */
+    public static double normalizeAngle(double angle) {
+        double angleNormalized = angle;
+        if (angle < -Math.PI) {
+            angleNormalized += 2 * Math.PI;
+        } else if (angleNormalized > Math.PI) {
+            angleNormalized -= 2 * Math.PI;
+        }
+        return angleNormalized;
+    }
+
 
     public static double getAngleIncrement() {
         return ANGLE_INCREMENT;

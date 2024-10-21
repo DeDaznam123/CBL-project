@@ -31,8 +31,8 @@ public class Enemy {
 
     int[] oldEnd;
 
-    private static BufferedImage[] enemyTextures;
-    private BufferedImage texture;
+    protected static BufferedImage[] enemyTextures;
+    protected BufferedImage texture;
 
     /**
      * Enemy constructor.
@@ -103,8 +103,8 @@ public class Enemy {
     
             // Avoid getting stuck at tiny distances.
             if (Math.abs(x - nextX) < 1 && Math.abs(y - nextY) < 1) {
-                counter++;  // Move to the next step in the path.
-    
+                counter++;
+
                 // Enemy reached end of path.
                 if (counter >= path.size()) {
                     counter = 0;
