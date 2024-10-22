@@ -39,7 +39,7 @@ public class Enemy {
      * @param player Player.
      */
     public Enemy(Player player) { 
-        this.speed = 0.05;
+        this.speed = 0.07;
         this.scoreValue = 50;
         this.player = player;
         this.damage = 1;
@@ -57,9 +57,7 @@ public class Enemy {
             // Turn the files into BufferedImages.
             enemyTextures = new BufferedImage[files.length];
             for (int i = 0; i < files.length; i++) {
-
                 enemyTextures[i] = ImageIO.read(files[i]);
-
             }
 
         } catch (Exception e) {
@@ -166,9 +164,28 @@ public class Enemy {
         x = spawnX;
         y = spawnY;
 
+        App.playSound("hit.wav");
+
         path.clear();
         oldEnd = null;
         counter = 0;
+    }
+
+    public void spawn() {
+        Random rand = new Random();
+        texture = enemyTextures[rand.nextInt(enemyTextures.length)];
+        int gridSize = Grid.getSize();
+        int cellSize = Grid.getCellSize();
+        int spawnX;
+        int spawnY;
+
+        do {
+            spawnX = rand.nextInt(gridSize * cellSize);
+            spawnY = rand.nextInt(gridSize * cellSize);
+        } while (Grid.isInWall(spawnX, spawnY));
+
+        x = spawnX;
+        y = spawnY;
     }
 
     public double getX() {

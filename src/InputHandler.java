@@ -4,11 +4,15 @@ import java.awt.event.*;
  * Handles the keyboard input from the player.
  */
 public class InputHandler implements KeyListener, MouseListener {
+    public boolean mouseClicked = false;
+
     public boolean wPressed;
     public boolean sPressed;
     public boolean aPressed;
     public boolean dPressed;
-    public boolean pPressed;
+    public boolean escPressed;
+
+    public boolean escHandled;
 
     @Override
     public void keyPressed(KeyEvent arg0) {
@@ -27,8 +31,11 @@ public class InputHandler implements KeyListener, MouseListener {
             case KeyEvent.VK_D:
                 dPressed = true;
                 break;
-            case KeyEvent.VK_P:
-                pPressed = true;
+            case KeyEvent.VK_ESCAPE:
+                if (!escHandled) {
+                    escPressed = true;
+                    escHandled = true;
+                }
                 break;
             default:
                 break;
@@ -52,8 +59,9 @@ public class InputHandler implements KeyListener, MouseListener {
             case KeyEvent.VK_D:
                 dPressed = false;
                 break;
-            case KeyEvent.VK_P:
-                pPressed = false;
+            case KeyEvent.VK_ESCAPE:
+                escPressed = false;
+                escHandled = false;
                 break;
             default:
                 break;
@@ -65,18 +73,18 @@ public class InputHandler implements KeyListener, MouseListener {
 
     // Mouse related events
 
-    public boolean mouseClicked = false;
+    @Override
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
         mouseClicked = true;
     }
 
     @Override
-    public void mousePressed(MouseEvent e) { }
-
-    @Override
-    public void mouseReleased(MouseEvent e) { }
+    public void mouseReleased(MouseEvent e) {
+        mouseClicked = false;
+    }
 
     @Override
     public void mouseEntered(MouseEvent e) { }

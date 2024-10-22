@@ -11,13 +11,16 @@ public class Player {
     // Depth of field (Largest side of the grid.)
     private static final int DOF = Grid.getSize() * Grid.getSize();
     // How much to rotate the player.
-    private static final double ROTATION_INCREMENT = 0.02;
+    private static final double ROTATION_INCREMENT = 0.015;
 
     // Value of pi.
     private static final double PI = Math.PI;
 
     // Distance at which player collides with a wall.
     private static final int HITBOX_SIZE = 5;
+
+    // Maximum health of the player.
+    private static final int MAX_HEALTH = 100;
 
     // Position of the player.
     private double x;
@@ -30,6 +33,8 @@ public class Player {
     private int health;
     private int score;
 
+    private int damage = 20;
+
     private double rayAngle;
 
     private double speedMultiplier = 2;
@@ -37,15 +42,14 @@ public class Player {
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
-        // Because the enemy gives points when spawning the first time.
-        this.score = -50;
-        this.health = 100;
+        this.score = 0;
+        this.health = MAX_HEALTH;
         orientation = 0;
     }
 
     public void shoot(Enemy enemy) {
         if (enemy.isAimedAt()) {
-            enemy.takeDamage(25);
+            enemy.takeDamage(damage);
         }
     }
 
@@ -92,7 +96,7 @@ public class Player {
                 depth++;
             }
         }
-        
+
         double[] result = {Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept)), xIntercept, yIntercept};
         return result;
     }
@@ -151,7 +155,7 @@ public class Player {
         // Angle of the ray.
         rayAngle = orientation - (PI / 6) + (i * App.getAngleIncrement());
         rayAngle = (rayAngle + 2 * PI) % (2 * PI);
-        
+
         // Avoid values where tan is Undefined and avoid division by 0
         if (rayAngle == PI / 2 || rayAngle == 3 * PI / 2 || rayAngle == 0 || rayAngle == PI) {
             rayAngle += 0.0001;
@@ -160,6 +164,10 @@ public class Player {
         // Check horizontal Lines and vertical lines
         double[] distH = castForHorizontalDistance(rayAngle);
         double[] distV = castForVerticalDistance(rayAngle);
+
+        // Adjust for fish eye effect.
+        distH[0] = distH[0] * Math.cos(orientation - rayAngle);
+        distV[0] = distV[0] * Math.cos(orientation - rayAngle);
 
         return new double[][] {distH, distV};
     }
@@ -246,7 +254,7 @@ public class Player {
     }
 
     public void respawn() {
-        health = 100;
+        health = MAX_HEALTH;
         score = 0;
 
         Random rand = new Random();
@@ -262,8 +270,6 @@ public class Player {
 
         x = spawnX;
         y = spawnY;
-
-
     }
 
     public int getScore() {
@@ -272,5 +278,12 @@ public class Player {
 
     public void addScore(int score) {
         this.score += score;
+    }
+
+    public void addPowerUp(Powerup powerup) {
+        health = Math.min(MAX_HEALTH, (int) (health + powerup.getHealthBonus()));
+        score += powerup.getScoreBonus();
+        speedMultiplier += powerup.getSpeedBonus();
+        damage += powerup.getDamageBonus();
     }
 }
