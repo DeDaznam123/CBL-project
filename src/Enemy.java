@@ -171,6 +171,9 @@ public class Enemy {
         counter = 0;
     }
 
+    /**
+     * Spawns the enemy in a random square on the grid.
+     */
     public void spawn() {
         Random rand = new Random();
         texture = enemyTextures[rand.nextInt(enemyTextures.length)];

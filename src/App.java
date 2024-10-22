@@ -3,9 +3,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
-
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -62,13 +60,15 @@ public class App extends JPanel implements Runnable {
 
     private BufferedImage powerupTexture;
 
-    private static Map<String, Clip> soundMap;
+    private static HashMap<String, Clip> soundMap;
 
     JButton resumeButton = new JButton("Resume");
     JButton restartButton = new JButton("Restart");
     JButton exitButton = new JButton("Exit");
 
     Powerup[] powerups = new Powerup[3];
+
+    private boolean gameStarted = false;
 
     /**
      * App constructor.
@@ -100,7 +100,6 @@ public class App extends JPanel implements Runnable {
                 Clip clip = AudioSystem.getClip();
                 clip.open(ais);
                 soundMap.put(soundFile.getName(), clip);
-                System.out.println("Loaded sound: " + soundFile.getName());
             }
 
         } catch (Exception e) {
@@ -110,6 +109,9 @@ public class App extends JPanel implements Runnable {
         startGame();
     }
 
+    /**
+     * Pre-load the UI elements.
+     */
     public void init() {
         // Resume button.
         resumeButton.setBounds(WIDTH / 2 - 150, HEIGHT / 2 - 145, 300, 50);
@@ -121,13 +123,19 @@ public class App extends JPanel implements Runnable {
         resumeButton.setOpaque(true);
 
         resumeButton.addActionListener(e -> {
+            playSound("hit.wav");
             paused = false;
             if (!player.isAlive()) {
                 handlePlayerDeath();
             }
+            if (!gameStarted) {
+                gameStarted = true;
+                player.respawn();
+            }
             resumeButton.setVisible(false);
             restartButton.setVisible(false);
             exitButton.setVisible(false);
+
         });
 
         resumeButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -135,6 +143,7 @@ public class App extends JPanel implements Runnable {
                 resumeButton.setBackground(new Color(60, 60, 60));
                 playSound("blip.wav");
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 resumeButton.setBackground(new Color(45, 45, 45));
             }
@@ -156,6 +165,7 @@ public class App extends JPanel implements Runnable {
                 restartButton.setBackground(new Color(60, 60, 60));
                 playSound("blip.wav");
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 restartButton.setBackground(new Color(45, 45, 45));
             }
@@ -177,6 +187,7 @@ public class App extends JPanel implements Runnable {
                 exitButton.setBackground(new Color(60, 60, 60));
                 playSound("blip.wav");
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 exitButton.setBackground(new Color(45, 45, 45));
             }
@@ -196,8 +207,9 @@ public class App extends JPanel implements Runnable {
         try {
             String java = System.getProperty("java.home") + "/bin/java";
             String classpath = System.getProperty("java.class.path");
-            // Build the command to restart the application
-            ProcessBuilder processBuilder = new ProcessBuilder(java, "-cp", classpath, this.getClass().getName());
+            // Build the command to restart the proram.
+            ProcessBuilder processBuilder = new ProcessBuilder(java, "-cp",
+                classpath, this.getClass().getName());
             processBuilder.start();
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -236,7 +248,7 @@ public class App extends JPanel implements Runnable {
             lastTime = now;
 
             // Only draw if unpaused.
-            if (!paused && player.isAlive()) {
+            if (!paused && player.isAlive() && gameStarted) {
                 updatePlayer();
                 updatePowerUps();
                 updateEnemy();
@@ -248,12 +260,13 @@ public class App extends JPanel implements Runnable {
                         16, 
                         BufferedImage.TYPE_INT_ARGB), 
                         new Point(0, 0), 
-                        "Invisible Cursor")
-                    );
+                        "Invisible Cursor"
+                    )
+                );
+                frames++;
             }
 
             repaint();
-            frames++;
 
             // FPS Calculation every 1 second (1e9 ns).
             if (now - fpsTimer >= 1e9) {
@@ -267,10 +280,13 @@ public class App extends JPanel implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }   
+            }
         }
     }
     
+    /**
+     * Loops the theme music.
+     */
     public void playTheme() {
         Clip clip = soundMap.get("theme.wav");
         if (!clip.isRunning()) {
@@ -279,6 +295,10 @@ public class App extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Footsteps that get louder inverse to distance.
+     * @param volume How loud the footsteps should be.
+     */
     public static void playFootsteps(float volume) {
         Random rand = new Random();
 
@@ -290,9 +310,15 @@ public class App extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Sets the volume of a clip.
+     * @param clip Clip to set volume of.
+     * @param volume Volume to set.
+     */
     public static void setVolume(Clip clip, float volume) {
         if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
-            FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            FloatControl volumeControl = (FloatControl) clip.getControl(
+                FloatControl.Type.MASTER_GAIN);
             volumeControl.setValue(volume);
         }
     }
@@ -341,17 +367,6 @@ public class App extends JPanel implements Runnable {
         handleShootingInput();
     }
 
-    public void updatePowerUps() {
-        for (Powerup powerup : powerups) {
-            double distance = Math.sqrt(Math.pow(player.getX() - powerup.getX(), 2) + Math.pow(player.getY() - powerup.getY(), 2));
-            if (distance < 64) {
-                playSound("blip.wav");
-                player.addPowerUp(powerup);
-                powerup.spawn();
-            }
-        }
-    }
-
     /**
      * Handles player movement.
      */
@@ -382,6 +397,25 @@ public class App extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Updates powerups.
+     */
+    public void updatePowerUps() {
+        for (Powerup powerup : powerups) {
+            double distance = Math.sqrt(Math.pow(player.getX() - powerup.getX(), 2) 
+                + Math.pow(player.getY() - powerup.getY(), 2));
+            if (distance < 64) {
+                playSound("blip.wav");
+                player.addPowerUp(powerup);
+                powerup.spawn();
+            }
+        }
+    }
+
+    /**
+     * Plays a sound.
+     * @param name Name of the sound file.
+     */
     public static void playSound(String name) {
         Clip clip = soundMap.get(name);
         if (clip.isRunning()) {
@@ -404,6 +438,9 @@ public class App extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * Handles player death.
+     */
     public void handlePlayerDeath() {
         if (!player.isAlive()) {
             for (Powerup powerup : powerups) {
@@ -434,22 +471,26 @@ public class App extends JPanel implements Runnable {
         drawEnemy(g2d);
         drawPowerUps(g2d);
 
+        if (!gameStarted) {
+            drawStartMenu(g2d);
+            return;
+        }
         if (!player.isAlive()) {
             drawDeathScreen(g2d);
+            return;
+        }
+
+        if (paused) {
+            drawPauseScreen(g2d);
+            return;
         }
 
         // Draw UI.
-        if (!paused && player.isAlive()) {
-            drawMiniMap(g2d);
-            drawFPSCounter(g2d);
-            drawScore(g2d);
-            drawHealthBar(g2d);
-            drawCursor(g2d);
-        }
-        
-        if (paused) {
-            drawPauseScreen(g2d);
-        }
+        drawMiniMap(g2d);
+        drawFPSCounter(g2d);
+        drawScore(g2d);
+        drawHealthBar(g2d);
+        drawCursor(g2d);
     }
 
     /**
@@ -491,12 +532,9 @@ public class App extends JPanel implements Runnable {
             if (distanceTypes[0][0] < distanceTypes[1][0]) {
                 distance = distanceTypes[0][0];
                 textureX = (int) distanceTypes[0][1] % wallTextureWidth;
-
-                g2d.setColor(new Color(80, 80, 80));
             } else {
                 distance = distanceTypes[1][0];
                 textureX = (int) distanceTypes[1][2] % wallTextureWidth;
-                g2d.setColor(new Color(100, 100, 100));
             }
 
             int projectedHeight = (int) (64 / distance * DISTANCE_PLAYER_TO_PLANE);
@@ -559,13 +597,17 @@ public class App extends JPanel implements Runnable {
         drawEnemyHealthBar(g2d, enemyScreenX, enemySize);
     }
 
+    /**
+     * Draws the pause screen.
+     * @param g2d Graphics2D.
+     */
     public void drawPauseScreen(Graphics2D g2d) {
         g2d.setColor(new Color(0, 0, 0, 128));
         g2d.fillRect(0, 0, WIDTH, HEIGHT);
 
         g2d.setColor(Color.WHITE);
         g2d.setFont(BIG_FONT);
-        g2d.drawString("Paused", WIDTH / 2 - 55, 350);
+        g2d.drawString("Paused", WIDTH / 2 - 55, HEIGHT / 2 - 170);
         g2d.setFont(FONT);
         g2d.drawString("© 2024 Victor Handzhiev & Miguel Lebrun", WIDTH / 2 - 145, HEIGHT - 100);
         
@@ -577,15 +619,41 @@ public class App extends JPanel implements Runnable {
         setCursor(Cursor.getDefaultCursor());
     }
 
+    /**
+     * Draws the start menu.
+     * @param g2d Graphics2D.
+     */
+    public void drawStartMenu(Graphics g2d) {
+        g2d.setColor(new Color(0, 0, 0, 128));
+        g2d.fillRect(0, 0, WIDTH, HEIGHT);
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(BIG_FONT);
+        g2d.drawString("DOOM-Like", WIDTH / 2 - 80, HEIGHT / 2 - 170);
+        g2d.setFont(FONT);
+        g2d.drawString("© 2024 Victor Handzhiev & Miguel Lebrun", WIDTH / 2 - 145, HEIGHT - 100);
+        
+        resumeButton.setText("Start Game");
+        resumeButton.setVisible(true);
+        restartButton.setVisible(true);
+        exitButton.setVisible(true);
+
+        setCursor(Cursor.getDefaultCursor());
+    }
+
+    /**
+     * Draws the death screen.
+     * @param g2d Graphics2D.
+     */
     public void drawDeathScreen(Graphics g2d) {
         g2d.setColor(new Color(0, 0, 0, 128));
         g2d.fillRect(0, 0, WIDTH, HEIGHT);
 
         g2d.setColor(Color.WHITE);
         g2d.setFont(BIG_FONT);
-        g2d.drawString("You died!", WIDTH / 2 - 70, 350);
+        g2d.drawString("You died!", WIDTH / 2 - 70, HEIGHT / 2 - 185);
         g2d.setFont(FONT);
-        g2d.drawString("Score: " + player.getScore(), WIDTH / 2 - 35, 370);
+        g2d.drawString("Score: " + player.getScore(), WIDTH / 2 - 35, HEIGHT / 2 - 160);
         g2d.drawString("© 2024 Victor Handzhiev & Miguel Lebrun", WIDTH / 2 - 145, HEIGHT - 100);
 
         resumeButton.setText("Respawn");
@@ -715,6 +783,10 @@ public class App extends JPanel implements Runnable {
             (int) (healthBarWidth * (enemy.health / 100.0)), healthBarHeight);
     }
 
+    /**
+     * Draws powerups.
+     * @param g2d Graphics2D.
+     */
     public void drawPowerUps(Graphics2D g2d) {
         for (Powerup powerup : powerups) {
             // Calculate distance from player to enemy
@@ -791,7 +863,7 @@ public class App extends JPanel implements Runnable {
         return ANGLE_INCREMENT;
     }
 
-    public Map<String, Clip> getSoundMap() {
+    public HashMap<String, Clip> getSoundMap() {
         return soundMap;
     }
 
