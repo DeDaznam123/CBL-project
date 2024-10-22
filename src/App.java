@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 import javax.swing.*;
 
 /**
@@ -23,7 +25,8 @@ public class App extends JPanel implements Runnable {
 
     // Font for all text in UI.
     private static final Font FONT = new Font(Font.SANS_SERIF, Font.BOLD, 15);
-    
+    private static final Font BIG_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 30);
+
     // Distance between the player and the projection plane.
     private static final int DISTANCE_PLAYER_TO_PLANE =  (int) (WIDTH / 2 
         / Math.tan(Math.toRadians(Player.getFOV()) / 2));
@@ -83,7 +86,7 @@ public class App extends JPanel implements Runnable {
         try {
             skyTexture = ImageIO.read(new File("resources/sky_textures/sky2.png"));
             skyWidth = skyTexture.getWidth();
-            wallTexture = ImageIO.read(new File("resources/wall_textures/brick5.png"));
+            wallTexture = ImageIO.read(new File("resources/wall_textures/brick4.png"));
             wallTextureWidth = wallTexture.getWidth();
             powerupTexture = ImageIO.read(new File("resources/other/hp.png"));
 
@@ -119,6 +122,9 @@ public class App extends JPanel implements Runnable {
 
         resumeButton.addActionListener(e -> {
             paused = false;
+            if (!player.isAlive()) {
+                handlePlayerDeath();
+            }
             resumeButton.setVisible(false);
             restartButton.setVisible(false);
             exitButton.setVisible(false);
@@ -230,11 +236,11 @@ public class App extends JPanel implements Runnable {
             lastTime = now;
 
             // Only draw if unpaused.
-            if (!paused) {
+            if (!paused && player.isAlive()) {
                 updatePlayer();
-                updateEnemy();
                 updatePowerUps();
-                
+                updateEnemy();
+
                 // Invisible cursor.
                 setCursor(Toolkit.getDefaultToolkit().createCustomCursor(
                     new BufferedImage(
@@ -273,6 +279,24 @@ public class App extends JPanel implements Runnable {
         }
     }
 
+    public static void playFootsteps(float volume) {
+        Random rand = new Random();
+
+        Clip clip = soundMap.get("step" + (rand.nextInt(2) + 1) + ".wav");
+        setVolume(clip, volume);
+        if (!clip.isRunning()) {
+            clip.setFramePosition(0); 
+            clip.start();
+        }
+    }
+
+    public static void setVolume(Clip clip, float volume) {
+        if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            volumeControl.setValue(volume);
+        }
+    }
+
     /**
      * Enemy logic.
      */
@@ -282,10 +306,16 @@ public class App extends JPanel implements Runnable {
         double deltaY = enemy.getY() - player.getY();
         double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
+        double maxDistance = 1000.0;
+
+        float volume = (float) (0 - (distance / maxDistance) * (0 + 40.0));
+        volume = Math.max(-40.0f, Math.min(0, volume));
+        
         if (distance < 64) {
             player.takeDamage(enemy.getDamage());
         } else {
             enemy.move();
+            playFootsteps(volume);
         }
     }
     
@@ -365,12 +395,22 @@ public class App extends JPanel implements Runnable {
      * Handles pausing the game.
      */
     public void handlePausingInput() {
-        if (inputHandler.escPressed) {
+        if (inputHandler.escPressed && player.isAlive()) {
             paused ^= true;
             inputHandler.escPressed = false;
             resumeButton.setVisible(false);
             restartButton.setVisible(false);
             exitButton.setVisible(false);
+        }
+    }
+
+    public void handlePlayerDeath() {
+        if (!player.isAlive()) {
+            for (Powerup powerup : powerups) {
+                powerup.spawn();
+            }
+            enemy.respawn();
+            player.respawn();
         }
     }
 
@@ -394,13 +434,19 @@ public class App extends JPanel implements Runnable {
         drawEnemy(g2d);
         drawPowerUps(g2d);
 
-        // Draw UI.
-        drawMiniMap(g2d);
-        drawFPSCounter(g2d);
-        drawScore(g2d);
-        drawHealthBar(g2d);
-        drawCursor(g2d);
+        if (!player.isAlive()) {
+            drawDeathScreen(g2d);
+        }
 
+        // Draw UI.
+        if (!paused && player.isAlive()) {
+            drawMiniMap(g2d);
+            drawFPSCounter(g2d);
+            drawScore(g2d);
+            drawHealthBar(g2d);
+            drawCursor(g2d);
+        }
+        
         if (paused) {
             drawPauseScreen(g2d);
         }
@@ -518,14 +564,34 @@ public class App extends JPanel implements Runnable {
         g2d.fillRect(0, 0, WIDTH, HEIGHT);
 
         g2d.setColor(Color.WHITE);
+        g2d.setFont(BIG_FONT);
+        g2d.drawString("Paused", WIDTH / 2 - 55, 350);
         g2d.setFont(FONT);
-        g2d.drawString("Paused", WIDTH / 2 - 30, 100);
         g2d.drawString("© 2024 Victor Handzhiev & Miguel Lebrun", WIDTH / 2 - 145, HEIGHT - 100);
         
+        resumeButton.setText("Resume");
         resumeButton.setVisible(true);
         restartButton.setVisible(true);
         exitButton.setVisible(true);
 
+        setCursor(Cursor.getDefaultCursor());
+    }
+
+    public void drawDeathScreen(Graphics g2d) {
+        g2d.setColor(new Color(0, 0, 0, 128));
+        g2d.fillRect(0, 0, WIDTH, HEIGHT);
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(BIG_FONT);
+        g2d.drawString("You died!", WIDTH / 2 - 70, 350);
+        g2d.setFont(FONT);
+        g2d.drawString("Score: " + player.getScore(), WIDTH / 2 - 35, 370);
+        g2d.drawString("© 2024 Victor Handzhiev & Miguel Lebrun", WIDTH / 2 - 145, HEIGHT - 100);
+
+        resumeButton.setText("Respawn");
+        resumeButton.setVisible(true);
+        restartButton.setVisible(true);
+        exitButton.setVisible(true);
         setCursor(Cursor.getDefaultCursor());
     }
 

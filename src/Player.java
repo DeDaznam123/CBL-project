@@ -39,6 +39,8 @@ public class Player {
 
     private double speedMultiplier = 2;
 
+    private boolean isAlive = true;
+
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
@@ -242,14 +244,21 @@ public class Player {
 
     public int getHealth() {
         return health;
-    }   
+    }  
+    
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void setAlive(boolean isAlive) {
+        this.isAlive = isAlive;
+    }
 
     public void takeDamage(int damage) {
         if (health - damage <= 0) {
-            respawn();
+            isAlive = false;
             return;
         }
-
         health -= damage;
     }
 
@@ -270,6 +279,8 @@ public class Player {
 
         x = spawnX;
         y = spawnY;
+        
+        isAlive = true;
     }
 
     public int getScore() {
