@@ -41,12 +41,16 @@ public class Player {
 
     private boolean isAlive = true;
 
+    /**
+     * Constructor.
+     * @param x x.
+     * @param y y.
+     */
     public Player(double x, double y) {
-        this.x = x;
-        this.y = y;
         this.score = 0;
         this.health = MAX_HEALTH;
         orientation = 0;
+        respawn();
     }
 
     public void shoot(Enemy enemy) {
@@ -281,8 +285,7 @@ public class Player {
         y = spawnY;
         
         isAlive = true;
-        App.playSound("hit.wav");
-
+        Grid.generateGrid();
     }
 
     public int getScore() {

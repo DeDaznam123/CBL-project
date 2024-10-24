@@ -38,12 +38,14 @@ public class Enemy {
      * Enemy constructor.
      * @param player Player.
      */
-    public Enemy(Player player) { 
-        this.speed = 0.07;
+    public Enemy(Player player, int enemyTextureIndex) { 
+        this.speed = 0.10;
         this.scoreValue = 50;
         this.player = player;
         this.damage = 1;
         this.health = 100;
+        this.texture = enemyTextures[enemyTextureIndex];
+        this.enemyTextureIndex = 0;
     }
 
     // Static initializer for enemy textures.
@@ -115,7 +117,7 @@ public class Enemy {
         return enemyTextureIndex;
     }
 
-    public static double lerp(double a, double b, double t) {
+    public double lerp(double a, double b, double t) {
         return a + t * (b - a);
     }
 
@@ -130,7 +132,8 @@ public class Enemy {
     public void takeDamage(int damage) {
         this.health -= damage;
         if (this.health <= 0) {
-            this.respawn();
+            this.spawn();
+            player.addScore(scoreValue);
         }
     }
 
@@ -145,12 +148,10 @@ public class Enemy {
     /**
      * Spawns the enemy in a random square on the grid.
      */
-    public void respawn() {
-        health = 100;
-        player.addScore(scoreValue);
-
+    public void spawn() {
         Random rand = new Random();
-        texture = enemyTextures[rand.nextInt(enemyTextures.length)];
+
+        // texture = enemyTextures[rand.nextInt(enemyTextures.length)];
         int gridSize = Grid.getSize();
         int cellSize = Grid.getCellSize();
         int spawnX;
@@ -163,32 +164,13 @@ public class Enemy {
 
         x = spawnX;
         y = spawnY;
+        health = 100;
 
         App.playSound("hit.wav");
 
         path.clear();
         oldEnd = null;
         counter = 0;
-    }
-
-    /**
-     * Spawns the enemy in a random square on the grid.
-     */
-    public void spawn() {
-        Random rand = new Random();
-        texture = enemyTextures[rand.nextInt(enemyTextures.length)];
-        int gridSize = Grid.getSize();
-        int cellSize = Grid.getCellSize();
-        int spawnX;
-        int spawnY;
-
-        do {
-            spawnX = rand.nextInt(gridSize * cellSize);
-            spawnY = rand.nextInt(gridSize * cellSize);
-        } while (Grid.isInWall(spawnX, spawnY));
-
-        x = spawnX;
-        y = spawnY;
     }
 
     public double getX() {

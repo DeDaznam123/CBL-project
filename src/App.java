@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import javax.imageio.ImageIO;
@@ -33,7 +34,7 @@ public class App extends JPanel implements Runnable {
     private static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
 
     private Player player = new Player(100, 100);
-    private Enemy enemy = new Enemy(player);
+    private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
 
     // FPS goal.
     private static final int FPS = 60;
@@ -66,7 +67,7 @@ public class App extends JPanel implements Runnable {
     JButton restartButton = new JButton("Restart");
     JButton exitButton = new JButton("Exit");
 
-    Powerup[] powerups = new Powerup[3];
+    private ArrayList<Powerup> powerups = new ArrayList<Powerup>();
 
     private boolean gameStarted = false;
 
@@ -229,14 +230,23 @@ public class App extends JPanel implements Runnable {
         gameThread = new Thread(this);
         gameThread.start();
     }
-
+    
     public void run() {
         Grid.generateGrid();
-        enemy.spawn();
 
-        powerups[0] = new Powerup(50, 5, 0, 5);
-        powerups[1] = new Powerup(50, 5, 0, 5);
-        powerups[2] = new Powerup(50, 5, 0, 5);
+        enemies.add(new Enemy(player, 1));
+        enemies.add(new Enemy(player, 2));
+        enemies.add(new Enemy(player, 3));
+        enemies.add(new Enemy(player, 4));
+        enemies.add(new Enemy(player, 5));
+
+        for (Enemy enemy : enemies) {
+            enemy.spawn();
+        }
+
+        powerups.add(new Powerup(50, 5, 0, 5));
+        powerups.add(new Powerup(50, 5, 0, 5));
+        powerups.add(new Powerup(50, 5, 0, 5));
 
         while (gameThread != null) {
             playTheme();
@@ -327,22 +337,25 @@ public class App extends JPanel implements Runnable {
      * Enemy logic.
      */
     public void updateEnemy() {
-        // Calculate distance from player to enemy
-        double deltaX = enemy.getX() - player.getX();
-        double deltaY = enemy.getY() - player.getY();
-        double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        for (Enemy enemy : enemies) {
+            // Calculate distance from player to enemy
+            double deltaX = enemy.getX() - player.getX();
+            double deltaY = enemy.getY() - player.getY();
+            double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-        double maxDistance = 1000.0;
+            double maxDistance = 1000.0;
 
-        float volume = (float) (0 - (distance / maxDistance) * (0 + 40.0));
-        volume = Math.max(-40.0f, Math.min(0, volume));
-        
-        if (distance < 64) {
-            player.takeDamage(enemy.getDamage());
-        } else {
-            enemy.move();
-            playFootsteps(volume);
+            float volume = (float) (0 - (distance / maxDistance) * (0 + 40.0));
+            volume = Math.max(-40.0f, Math.min(0, volume));
+
+            if (distance < 64) {
+                player.takeDamage(enemy.getDamage());
+            } else {
+                enemy.move();
+                playFootsteps(volume);
+            }
         }
+
     }
     
     /**
@@ -351,12 +364,15 @@ public class App extends JPanel implements Runnable {
      * @param enemyScreenX Screen x-coordinate of the enemy.
      * @param enemySize Size of the enemy.
      */
-    public void updateAim(Graphics2D g2d, int enemyScreenX, int enemySize) {
-        if (enemyScreenX < WIDTH / 2 + enemySize / 2 && enemyScreenX > WIDTH / 2 - enemySize / 2) {
+    public void updateAim(Graphics2D g2d, int enemyScreenX, int enemySize, Enemy enemy) {
+
+        if (enemyScreenX < WIDTH / 2 + enemySize / 2
+            && enemyScreenX > WIDTH / 2 - enemySize / 2) {
             enemy.setAimedAt(true);
         } else {
             enemy.setAimedAt(false);
         }
+        
     }
 
     /**
@@ -389,12 +405,15 @@ public class App extends JPanel implements Runnable {
      * Handles player shooting.
      */
     public void handleShootingInput() {
-        if (inputHandler.mouseClicked) {
-            player.shoot(enemy);
-            inputHandler.mouseClicked = false;
-            
-            playSound("gun.wav");
+        for (Enemy enemy : enemies) {
+            if (inputHandler.mouseClicked) {
+                player.shoot(enemy);
+                
+                playSound("gun.wav");
+            }
         }
+        inputHandler.mouseClicked = false;
+
     }
 
     /**
@@ -442,12 +461,14 @@ public class App extends JPanel implements Runnable {
      * Handles player death.
      */
     public void handlePlayerDeath() {
-        if (!player.isAlive()) {
-            for (Powerup powerup : powerups) {
-                powerup.spawn();
+        for (Enemy enemy : enemies) {
+            if (!player.isAlive()) {
+                for (Powerup powerup : powerups) {
+                    powerup.spawn();
+                }
+                enemy.spawn();
+                player.respawn();
             }
-            enemy.respawn();
-            player.respawn();
         }
     }
 
@@ -468,8 +489,11 @@ public class App extends JPanel implements Runnable {
         // Draw world and enemy.
         drawSky(g2d);
         drawWalls(g2d);
-        drawEnemy(g2d);
         drawPowerUps(g2d);
+
+        for (Enemy enemy : enemies) {
+            drawEnemy(g2d, enemy);
+        }
 
         if (!gameStarted) {
             drawStartMenu(g2d);
@@ -556,7 +580,7 @@ public class App extends JPanel implements Runnable {
      * Draws the enemy on the screen in a 2.5D raycasted style.
      * @param g2d Graphics2D.
      */
-    public void drawEnemy(Graphics2D g2d) {
+    public void drawEnemy(Graphics2D g2d, Enemy enemy) {
 
         // Calculate distance from player to enemy
         double deltaX = enemy.getX() - player.getX();
@@ -575,7 +599,7 @@ public class App extends JPanel implements Runnable {
         int enemySize = (int) 
             (enemy.getSize() / distance * DISTANCE_PLAYER_TO_PLANE); 
 
-        updateAim(g2d, enemyScreenX, enemySize);
+        updateAim(g2d, enemyScreenX, enemySize, enemy);
 
         // Clamp relative angle to field of view
         double halfFOV = Math.toRadians(Player.getFOV()) / 2;
@@ -594,7 +618,8 @@ public class App extends JPanel implements Runnable {
 
         // Draw enemy.
         g2d.drawImage(enemy.getTexture(), adjustedX, adjustedY, enemySize, enemySize, null);
-        drawEnemyHealthBar(g2d, enemyScreenX, enemySize);
+        drawEnemyHealthBars(g2d, enemyScreenX, enemySize, enemy);
+    
     }
 
     /**
@@ -697,21 +722,25 @@ public class App extends JPanel implements Runnable {
         // Draw player position
         int playerX = scaleToMiniMap(player.getX());
         int playerY = scaleToMiniMap(player.getY());
-        int enemyX = scaleToMiniMap(enemy.getX());
-        int enemyY = scaleToMiniMap(enemy.getY());
 
         // Draw player.
         g2d.fillRect(playerX, playerY, 3, 3);
+        
+        for (Enemy enemy : enemies) {
 
-        // Draw player direction.
-        int indicatorX = (int) (playerX + 10 * Math.cos(player.getOrientation()));
-        int indicatorY = (int) (playerY + 10 * Math.sin(player.getOrientation()));
-        g2d.setColor(Color.RED);
-        g2d.drawLine(playerX + 1, playerY + 1, indicatorX + 1, indicatorY + 1);
+            int enemyX = scaleToMiniMap(enemy.getX());
+            int enemyY = scaleToMiniMap(enemy.getY());
 
-        // Draw enemy.
-        g2d.setColor(Color.ORANGE);
-        g2d.fillRect(enemyX, enemyY, 3, 3);
+            // Draw player direction.
+            int indicatorX = (int) (playerX + 10 * Math.cos(player.getOrientation()));
+            int indicatorY = (int) (playerY + 10 * Math.sin(player.getOrientation()));
+            g2d.setColor(Color.RED);
+            g2d.drawLine(playerX + 1, playerY + 1, indicatorX + 1, indicatorY + 1);
+
+            // Draw enemy.
+            g2d.setColor(Color.ORANGE);
+            g2d.fillRect(enemyX, enemyY, 3, 3);
+        }
 
         for (Powerup powerup : powerups) {
             int powerupX = scaleToMiniMap(powerup.getX());
@@ -770,7 +799,8 @@ public class App extends JPanel implements Runnable {
      * @param enemyScreenX Screen x-coordinate of the enemy.
      * @param enemySize Size of the enemy.
      */
-    public void drawEnemyHealthBar(Graphics2D g2d, int enemyScreenX, int enemySize) {
+    public void drawEnemyHealthBars(Graphics2D g2d, int enemyScreenX, int enemySize, Enemy enemy) {
+        
         int healthBarWidth = 30;
         int healthBarHeight = 5;
         int healthBarX = enemyScreenX - healthBarWidth / 2;

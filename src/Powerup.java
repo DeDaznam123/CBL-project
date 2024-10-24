@@ -1,5 +1,8 @@
 import java.util.Random;
 
+/**
+ * Powerup.
+ */
 public class Powerup {
     private double healthBonus;
     private double damageBonus;
@@ -9,6 +12,13 @@ public class Powerup {
     private double x;
     private double y;
     
+    /**
+     * Constructor.
+     * @param healthBonus health bonus
+     * @param damageBonus damage bonus
+     * @param speedBonus speed bonus
+     * @param scoreBonus score bonus
+     */
     public Powerup(int healthBonus, int damageBonus, int speedBonus, int scoreBonus) {
         this.healthBonus = healthBonus;
         this.damageBonus = damageBonus;
@@ -17,6 +27,9 @@ public class Powerup {
         spawn();
     }
 
+    /**
+     * Spawns the powerup.
+     */
     public void spawn() {
         Random rand = new Random();
         int gridSize = Grid.getSize();
