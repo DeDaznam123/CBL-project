@@ -1,6 +1,9 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+
 import javax.imageio.ImageIO;
 
 /**
@@ -8,31 +11,34 @@ import javax.imageio.ImageIO;
  */
 public class Enemy {
 
+    // Stats of the enemy.
     protected double speed;
     protected int health;
+    protected int damage;
+    protected int scoreValue;
+    protected int size = 32;
 
+    // Coordinates of the enemy.
     protected double x;
     protected double y;
     protected double nextX;
     protected double nextY;
 
-    protected int scoreValue;
-    protected int damage;
-    protected double orientation;
-    protected int size = 32;
-
+    // Target player.
     protected Player player;
     protected boolean aimedAt = false;
 
-    protected int enemyTextureIndex;
 
-    List<int[]> path = new ArrayList<int[]>();
+    ArrayList<int[]> path = new ArrayList<int[]>();
     int counter;
-
     int[] oldEnd;
 
-    protected static BufferedImage[] enemyTextures;
+    // Index of the texture the enemy has.
+    protected int enemyTextureIndex;
     protected BufferedImage texture;
+
+    // All possible texture for the enemy.
+    protected static BufferedImage[] enemyTextures;
 
     /**
      * Enemy constructor.
@@ -46,6 +52,7 @@ public class Enemy {
         this.health = 100;
         this.texture = enemyTextures[enemyTextureIndex];
         this.enemyTextureIndex = 0;
+        spawn();
     }
 
     // Static initializer for enemy textures.
@@ -133,6 +140,7 @@ public class Enemy {
         this.health -= damage;
         if (this.health <= 0) {
             this.spawn();
+            App.playSound("hit.wav");
             player.addScore(scoreValue);
         }
     }
@@ -165,8 +173,6 @@ public class Enemy {
         x = spawnX;
         y = spawnY;
         health = 100;
-
-        App.playSound("hit.wav");
 
         path.clear();
         oldEnd = null;

@@ -1,4 +1,7 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.PriorityQueue;
 
 /**
  * Grid.
@@ -6,10 +9,15 @@ import java.util.*;
 public class Grid {
 
     static class Node implements Comparable<Node> {
-        int x;
+        // X and Y coordinates of the node.
+        int x; 
         int y;
-        int g; // Distance from start to this node
-        int f;  // Total cost (g + h)
+
+        // Distance from start to this node
+        int g; 
+
+        // Cost of the node.
+        int f;
 
         Node parent;
 
@@ -29,13 +37,14 @@ public class Grid {
             this.parent = parent;
         }
 
-        // Compare nodes based on their f-value (for priority queue)
+        // Compare nodes based on their f-value (PriorityQueue).
         @Override
         public int compareTo(Node other) {
             return Integer.compare(this.f, other.f);
         }
     }
 
+    // Number of cells in X and Y directions.
     private static final int SIZE = 30;
     private static int[][] grid = new int[SIZE][SIZE];
 
@@ -159,68 +168,73 @@ public class Grid {
     // Pixels per cell in grid.
     private static final int CELL_SIZE = 64;
 
-    // Directions for moving in the 4 cardinal directions (up, down, left, right)
+    // Directions for moving in 4 directions (up, down, left, right).
     private static final int[][] DIRECTIONS = {
-        {0, 1},  // Right
-        {1, 0},  // Down
-        {0, -1}, // Left
-        {-1, 0}  // Upconflicts
+        {0, 1},  // Right.
+        {1, 0},  // Down.
+        {0, -1}, // Left.
+        {-1, 0}  // Up.
     };
 
-    // Heuristic function (Manhattan distance)
+    // Heuristic function (Manhattan distance).
     private static int heuristic(int x1, int y1, int x2, int y2) {
         return Math.abs(x1 - x2) + Math.abs(y1 - y2);
     }
 
-    // Reconstruct the path by backtracking from the goal
-    private static List<int[]> reconstructPath(Node node) {
-        List<int[]> path = new ArrayList<>();
+    // Reconstruct the path by backtracking from the goal.
+    private static ArrayList<int[]> reconstructPath(Node node) {
+        ArrayList<int[]> path = new ArrayList<>();
         while (node != null) {
             path.add(new int[]{node.x, node.y});
             node = node.parent;
         }
-        Collections.reverse(path);  // Path should be from start to goal
+
+        // Invert the path to be from start to goal.
+        Collections.reverse(path);
         return path;
 
     }
 
     /**
-     * Perform A* search to find the shortest path from start to goal.
+     * Perform A* search to find the path from start to goal.
      * @param start Start coordinates.
      * @param goal Goal coordinates.
      * @return List of coordinates representing the path from start to goal.
      */
-    public static List<int[]> performAStar(int[] start, int[] goal) {
+    public static ArrayList<int[]> performAStar(int[] start, int[] goal) {
         PriorityQueue<Node> openSet = new PriorityQueue<>();
-        Map<String, Node> allNodes = new HashMap<>();
-        // Start node
+        HashMap<String, Node> allNodes = new HashMap<>();
+
+        // Start node.
         Node startNode = new Node(start[0], start[1], 0,
             heuristic(start[0], start[1], goal[0], goal[1]), null);
+
         openSet.add(startNode);
         allNodes.put(start[0] + "," + start[1], startNode);
 
         while (!openSet.isEmpty()) {
             Node current = openSet.poll();
 
-            // If we reached the goal, reconstruct the path
+            // If reached the goal, reconstruct the path.
             if (current.x == goal[0] && current.y == goal[1]) {
                 return reconstructPath(current);
             }
 
-            // Explore neighbors
+            // Explore neighbors.
             for (int[] direction : DIRECTIONS) {
                 int neighborX = current.x + direction[0];
                 int neighborY = current.y + direction[1];
 
-                // Check if the neighbor is within bounds and walkable
+                // Check if the neighbor is within bounds and not in wall.
                 if (isInBounds(grid, neighborX, neighborY) && grid[neighborX][neighborY] == 0) {
-                    int tentativeG = current.g + 1; // Distance between nodes is 1
-
+                    // +1 distance.
+                    int tentativeG = current.g + 1;
                     String neighborKey = neighborX + "," + neighborY;
+
                     Node neighbor = allNodes.getOrDefault(neighborKey, new Node(neighborX,
                         neighborY, Integer.MAX_VALUE, Integer.MAX_VALUE, null));
 
-                    // If this path to ngenerateGrideighbor is better, update it
+                    // If the path through neighbor is better, update it.
                     if (tentativeG < neighbor.g) {
                         neighbor.g = tentativeG;
                         neighbor.f = neighbor.g + heuristic(neighborX, neighborY, goal[0], goal[1]);
@@ -234,7 +248,8 @@ public class Grid {
                 }
             }
         }
-        // No path found, return an empty list
+
+        // No path found.
         return new ArrayList<>();
     }
 
@@ -320,6 +335,11 @@ public class Grid {
         }
     }
 
+    /**
+     * Rotates a template.
+     * @param template Template to rotate.
+     * @return The rotated template.
+     */
     private static int[][] rotate(int[][] template) {
         int[][] templateCopy = new int[template.length][template[0].length]; 
         for (int i = 0; i < template.length; i++) {

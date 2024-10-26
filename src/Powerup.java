@@ -13,7 +13,7 @@ public class Powerup {
     private double y;
     
     /**
-     * Constructor.
+     * Constructor for the powerup class.
      * @param healthBonus health bonus
      * @param damageBonus damage bonus
      * @param speedBonus speed bonus
@@ -38,10 +38,12 @@ public class Powerup {
         int spawnY;
 
         do {
+            // Check random cells until one is not in wall.
             spawnX = rand.nextInt(gridSize * cellSize);
             spawnY = rand.nextInt(gridSize * cellSize);
         } while (Grid.isInWall(spawnX, spawnY));
 
+        // Spawn at those coordinates.
         x = spawnX;
         y = spawnY;
     }

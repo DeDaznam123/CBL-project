@@ -1,4 +1,7 @@
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  * Handles the keyboard input from the player.
@@ -71,6 +74,7 @@ public class InputHandler implements KeyListener, MouseListener {
     @Override
     public void keyTyped(KeyEvent arg0) { }
 
+    
     // Mouse related events
 
     @Override

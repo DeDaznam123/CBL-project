@@ -29,20 +29,17 @@ public class Player {
     // Orientation in radians relative to absolute east (like unit circle).
     private double orientation;
 
-    // Health and score of the player.
+    // Stats of the player.
     private int health;
     private int score;
-
     private int damage = 20;
-
-    private double rayAngle;
-
     private double speedMultiplier = 2;
 
     private boolean isAlive = true;
+    private double rayAngle;
 
     /**
-     * Constructor.
+     * Intitialize the player with basic stats.
      * @param x x.
      * @param y y.
      */
@@ -210,6 +207,7 @@ public class Player {
 
     public void rotateLeft() {
         orientation -= ROTATION_INCREMENT;
+        // Normalize angle.
         if (orientation < 0) {
             orientation += 2 * PI;
         }
@@ -217,6 +215,7 @@ public class Player {
 
     public void rotateRight() {
         orientation += ROTATION_INCREMENT;
+        // Normalize angle.
         if (orientation > (2 * PI)) {
             orientation -= 2 * PI;
         }
@@ -277,15 +276,16 @@ public class Player {
         int spawnY;
 
         do {
+            // Check random cells until one is not in wall.
             spawnX = rand.nextInt(gridSize * cellSize);
             spawnY = rand.nextInt(gridSize * cellSize);
         } while (Grid.isInWall(spawnX, spawnY));
 
+        // Spawn at those coordinates.
         x = spawnX;
         y = spawnY;
         
         isAlive = true;
-        Grid.generateGrid();
     }
 
     public int getScore() {
@@ -297,6 +297,7 @@ public class Player {
     }
 
     public void addPowerUp(Powerup powerup) {
+        // Add the bonus value to the current stats.
         health = Math.min(MAX_HEALTH, (int) (health + powerup.getHealthBonus()));
         score += powerup.getScoreBonus();
         speedMultiplier += powerup.getSpeedBonus();

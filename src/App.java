@@ -1,4 +1,11 @@
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +17,11 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 
 /**
  * Main JPanel.
@@ -33,8 +44,10 @@ public class App extends JPanel implements Runnable {
     // How much to rotate after each ray cast.
     private static final double ANGLE_INCREMENT = Math.toRadians(Player.getFOV()) / (double) WIDTH;
 
+    // Game objects with sprites.
     private Player player = new Player(100, 100);
     private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
+    private ArrayList<Powerup> powerups = new ArrayList<Powerup>();
 
     // FPS goal.
     private static final int FPS = 60;
@@ -46,30 +59,29 @@ public class App extends JPanel implements Runnable {
     private static int frames = 0;
     private static int fps = 0;
 
-    private static boolean paused = false;
-
     // KeyHandler.
     InputHandler inputHandler = new InputHandler();
     Thread gameThread;
 
     // Textures.
     private BufferedImage skyTexture;
-    private int skyWidth;
-
     private BufferedImage wallTexture;
+    private BufferedImage powerupTexture;
+    private int skyWidth;
     private int wallTextureWidth;
 
-    private BufferedImage powerupTexture;
-
+    // Sounds.
     private static HashMap<String, Clip> soundMap;
 
+    // Game state variables.
+    private boolean gameStarted = false;
+    private static boolean paused = false;
+
+    // Menu buttons.
     JButton resumeButton = new JButton("Resume");
     JButton restartButton = new JButton("Restart");
     JButton exitButton = new JButton("Exit");
 
-    private ArrayList<Powerup> powerups = new ArrayList<Powerup>();
-
-    private boolean gameStarted = false;
 
     /**
      * App constructor.
@@ -81,13 +93,14 @@ public class App extends JPanel implements Runnable {
         this.addMouseListener(inputHandler);
         this.setFocusable(true);
 
+        // Initialize the UI elements.
         init();
 
-        // Load textures.
+        // Load textures and sounds.
         try {
             skyTexture = ImageIO.read(new File("resources/sky_textures/sky2.png"));
             skyWidth = skyTexture.getWidth();
-            wallTexture = ImageIO.read(new File("resources/wall_textures/brick4.png"));
+            wallTexture = ImageIO.read(new File("resources/wall_textures/brick9.png"));
             wallTextureWidth = wallTexture.getWidth();
             powerupTexture = ImageIO.read(new File("resources/other/hp.png"));
 
@@ -107,6 +120,7 @@ public class App extends JPanel implements Runnable {
             e.printStackTrace();
         }
 
+        // Initialize game thread.
         startGame();
     }
 
@@ -124,7 +138,6 @@ public class App extends JPanel implements Runnable {
         resumeButton.setOpaque(true);
 
         resumeButton.addActionListener(e -> {
-            playSound("hit.wav");
             paused = false;
             if (!player.isAlive()) {
                 handlePlayerDeath();
@@ -194,7 +207,7 @@ public class App extends JPanel implements Runnable {
             }
         });
 
-        // Hide until paused.
+        // Hide buttons until paused.
         resumeButton.setVisible(false);
         restartButton.setVisible(false);
         exitButton.setVisible(false);
@@ -216,6 +229,7 @@ public class App extends JPanel implements Runnable {
             ex.printStackTrace();
         }
 
+        // Close the current instance after restarting.
         exitApplication();
     }
 
@@ -234,22 +248,24 @@ public class App extends JPanel implements Runnable {
     public void run() {
         Grid.generateGrid();
 
+        // Initialize the enemies
         enemies.add(new Enemy(player, 1));
         enemies.add(new Enemy(player, 2));
         enemies.add(new Enemy(player, 3));
         enemies.add(new Enemy(player, 4));
         enemies.add(new Enemy(player, 5));
 
-        for (Enemy enemy : enemies) {
-            enemy.spawn();
-        }
-
+        // Initialize the powerups.
         powerups.add(new Powerup(50, 5, 0, 5));
         powerups.add(new Powerup(50, 5, 0, 5));
         powerups.add(new Powerup(50, 5, 0, 5));
 
+        // Game loop.
         while (gameThread != null) {
+            // Play the music if it has ended.
             playTheme();
+
+            // Check if the game has been paused / unpaused.
             handlePausingInput();
 
             // Calculate time elapsed since last frame.
@@ -276,6 +292,7 @@ public class App extends JPanel implements Runnable {
                 frames++;
             }
 
+            // Draw world.
             repaint();
 
             // FPS Calculation every 1 second (1e9 ns).
@@ -343,6 +360,7 @@ public class App extends JPanel implements Runnable {
             double deltaY = enemy.getY() - player.getY();
             double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
+            // Distance at which the sound cannot be heard anymore.
             double maxDistance = 1000.0;
 
             float volume = (float) (0 - (distance / maxDistance) * (0 + 40.0));
@@ -352,6 +370,7 @@ public class App extends JPanel implements Runnable {
                 player.takeDamage(enemy.getDamage());
             } else {
                 enemy.move();
+                // Set footstep volume inverse to the distance from player.
                 playFootsteps(volume);
             }
         }
@@ -359,20 +378,18 @@ public class App extends JPanel implements Runnable {
     }
     
     /**
-     * Updates the enemy's aim.
+     * Checks whether the player is aiming at an enemy.
      * @param g2d Graphics2D.
      * @param enemyScreenX Screen x-coordinate of the enemy.
      * @param enemySize Size of the enemy.
      */
     public void updateAim(Graphics2D g2d, int enemyScreenX, int enemySize, Enemy enemy) {
-
         if (enemyScreenX < WIDTH / 2 + enemySize / 2
             && enemyScreenX > WIDTH / 2 - enemySize / 2) {
             enemy.setAimedAt(true);
         } else {
             enemy.setAimedAt(false);
         }
-        
     }
 
     /**
@@ -408,12 +425,11 @@ public class App extends JPanel implements Runnable {
         for (Enemy enemy : enemies) {
             if (inputHandler.mouseClicked) {
                 player.shoot(enemy);
-                
                 playSound("gun.wav");
             }
         }
-        inputHandler.mouseClicked = false;
 
+        inputHandler.mouseClicked = false;
     }
 
     /**
@@ -423,6 +439,8 @@ public class App extends JPanel implements Runnable {
         for (Powerup powerup : powerups) {
             double distance = Math.sqrt(Math.pow(player.getX() - powerup.getX(), 2) 
                 + Math.pow(player.getY() - powerup.getY(), 2));
+
+            // Collect powerup if it is in range of the player.
             if (distance < 64) {
                 playSound("blip.wav");
                 player.addPowerUp(powerup);
@@ -461,8 +479,11 @@ public class App extends JPanel implements Runnable {
      * Handles player death.
      */
     public void handlePlayerDeath() {
-        for (Enemy enemy : enemies) {
-            if (!player.isAlive()) {
+        // Re-generate grid.
+        Grid.generateGrid();
+
+        if (!player.isAlive()) {
+            for (Enemy enemy : enemies) {
                 for (Powerup powerup : powerups) {
                     powerup.spawn();
                 }
@@ -486,30 +507,35 @@ public class App extends JPanel implements Runnable {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         
-        // Draw world and enemy.
+        // Draw world.
         drawSky(g2d);
         drawWalls(g2d);
         drawPowerUps(g2d);
 
+        // Draw all enemies
         for (Enemy enemy : enemies) {
             drawEnemy(g2d, enemy);
         }
 
+        // Draw main menu if its the first running. 
         if (!gameStarted) {
             drawStartMenu(g2d);
             return;
         }
+
+        // Draw death menu if player isnt alive.
         if (!player.isAlive()) {
             drawDeathScreen(g2d);
             return;
         }
 
+        // Draw pause menu if game is paused.
         if (paused) {
             drawPauseScreen(g2d);
             return;
         }
 
-        // Draw UI.
+        // Draw in game UI.
         drawMiniMap(g2d);
         drawFPSCounter(g2d);
         drawScore(g2d);
@@ -528,6 +554,7 @@ public class App extends JPanel implements Runnable {
         int offset = (int) ((player.getOrientation() / (2 * Math.PI)) * skyWidth 
             * (360.0 / Player.getFOV()) % skyWidth);
     
+        // Normalize the offset.
         if (offset < 0) {
             offset += skyWidth;
         }
@@ -550,6 +577,7 @@ public class App extends JPanel implements Runnable {
         g2d.setColor(new Color(146, 136, 62));
         g2d.fillRect(0, HEIGHT / 2, WIDTH, HEIGHT);
         
+        // Go through every pixel on the screen and cast a ray.
         for (int x = 0; x < WIDTH; x++) {
             double[][] distanceTypes = player.castRay(x);
 
