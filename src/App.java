@@ -385,7 +385,8 @@ public class App extends JPanel implements Runnable {
     public static void setGlobalVolume(float volume) {
         for (Clip clip : soundMap.values()) {
             if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
-                FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                FloatControl volumeControl = 
+                    (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
                 volumeControl.setValue(volume);
             }
         }

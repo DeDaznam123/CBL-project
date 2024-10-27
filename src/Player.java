@@ -50,12 +50,21 @@ public class Player {
         respawn();
     }
 
+    /**
+    * Shoot at the enemy.
+    * @param enemy which enemy.
+    */
     public void shoot(Enemy enemy) {
         if (enemy.isAimedAt()) {
             enemy.takeDamage(damage);
         }
     }
 
+    /**
+     * Cast a ray to find the distance to horizontal wall.
+     * @param rayAngle angle of the ray.
+     * @return distance to the wall.
+     */
     public double[] castForHorizontalDistance(double rayAngle) {
         double aTan = -1 / Math.tan(rayAngle);
         double xIntercept = 0;
@@ -65,31 +74,32 @@ public class Player {
         double depth = 0;
 
         // Facing up.
-        if (rayAngle > PI){
+        if (rayAngle > PI) {
             yIntercept = y - (y % 64) - 0.0001;
             xIntercept = (y - yIntercept) * aTan + x;
             dy = -64;
             dx = -dy * aTan;
         }
         // Facing down.
-        if (rayAngle < PI){
+        if (rayAngle < PI) {
             yIntercept = y - (y % 64) + 64;
             xIntercept = (y - yIntercept) * aTan + x;
             dy = 64;
             dx = -dy * aTan;
         }
         // Facing directly left or right.
-        if (rayAngle == 0 || rayAngle == PI){
+        if (rayAngle == 0 || rayAngle == PI) {
             xIntercept = x;
             yIntercept = y;
             depth = DOF;
         }
 
-        while(depth < DOF){
+        while (depth < DOF) {
             int xIndex = (int) xIntercept >> 6;
             int yIndex = (int) yIntercept >> 6;
 
-            if(yIndex >= 0 && xIndex >= 0 && yIndex < Grid.getSize() && xIndex < Grid.getSize() && Grid.getGrid()[xIndex][yIndex]==1){
+            if (yIndex >= 0 && xIndex >= 0 && yIndex < Grid.getSize() 
+                && xIndex < Grid.getSize() && Grid.getGrid()[xIndex][yIndex] == 1) {
                 depth = DOF;
                 break;
                 
@@ -100,10 +110,16 @@ public class Player {
             }
         }
 
-        double[] result = {Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept)), xIntercept, yIntercept};
+        double[] result = {Math.sqrt((y - yIntercept) * (y - yIntercept) 
+            + (x - xIntercept) * (x - xIntercept)), xIntercept, yIntercept};
         return result;
     }
 
+    /**
+     * Cast a ray to find the distance to vertical wall.
+     * @param rayAngle angle of the ray.
+     * @return distance to the wall.
+     */
     public double[] castForVerticalDistance(double rayAngle) {
         double nTan = -Math.tan(rayAngle);
         double xIntercept = 0;
@@ -113,31 +129,32 @@ public class Player {
         double depth = 0;
 
         // If the ray is facing left.
-        if (rayAngle > PI/2 && rayAngle < 3*PI/2){
+        if (rayAngle > PI / 2 && rayAngle < 3 * PI / 2) {
             xIntercept = x - (x % 64) - 0.0001;
             yIntercept = (x - xIntercept) * nTan + y;
             dx = -64;
             dy = -dx * nTan;
         }
         // If the ray is facing right.
-        if (rayAngle < PI/2 || rayAngle > 3*PI/2){
+        if (rayAngle < PI / 2 || rayAngle > 3 * PI / 2) {
             xIntercept = x - (x % 64) + 64;
             yIntercept = (x - xIntercept) * nTan + y;
             dx = 64;
             dy = -dx * nTan;
         }
         // Up / Down.
-        if (rayAngle == 0 || rayAngle == PI){
+        if (rayAngle == 0 || rayAngle == PI) {
             xIntercept = x;
             yIntercept = y;
             depth = DOF;
         }
 
-        while(depth < DOF){
-            int xIndex = (int)xIntercept >> 6;
-            int yIndex = (int)yIntercept >> 6;
+        while (depth < DOF) {
+            int xIndex = (int) xIntercept >> 6;
+            int yIndex = (int) yIntercept >> 6;
 
-            if(yIndex < Grid.getSize() && xIndex < Grid.getSize() && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex]==1){      
+            if (yIndex < Grid.getSize() && xIndex < Grid.getSize() 
+                && yIndex >= 0 && xIndex >= 0 && Grid.getGrid()[xIndex][yIndex] == 1) {      
                 depth = DOF;
                 break;
                 
@@ -148,11 +165,16 @@ public class Player {
             }
         }
 
-        double[] result = {Math.sqrt((y - yIntercept) * (y - yIntercept) + (x - xIntercept) * (x - xIntercept)), xIntercept, yIntercept};
+        double[] result = {Math.sqrt((y - yIntercept) * (y - yIntercept) 
+            + (x - xIntercept) * (x - xIntercept)), xIntercept, yIntercept};
         return result;
     }
 
-    // Cast one ray from the player.
+    /**
+     * Cast a ray to find the distance to a wall.
+     * @param i index of the ray.
+     * @return distance to vertical and horizontal wall.
+     */
     public double[][] castRay(double i) {
 
         // Angle of the ray.
@@ -175,6 +197,9 @@ public class Player {
         return new double[][] {distH, distV};
     }
 
+    /**
+     * Move the player forward.
+     */
     public void moveForward() {
         double newPosX = x + Math.cos(orientation) * speedMultiplier;
         double newPosY = y + Math.sin(orientation) * speedMultiplier;
@@ -189,7 +214,10 @@ public class Player {
             y = newPosY;
         }
     }
-    
+
+    /**
+     * Move the player backward.
+     */
     public void moveBackward() {
         double newPosX = x - Math.cos(orientation) * speedMultiplier;
         double newPosY = y - Math.sin(orientation) * speedMultiplier;
@@ -205,6 +233,9 @@ public class Player {
         }
     }
 
+    /**
+     * Rotate the player left.
+     */
     public void rotateLeft() {
         orientation -= ROTATION_INCREMENT;
         // Normalize angle.
@@ -213,6 +244,9 @@ public class Player {
         }
     }
 
+    /**
+     * Rotate the player right.
+     */
     public void rotateRight() {
         orientation += ROTATION_INCREMENT;
         // Normalize angle.
@@ -257,6 +291,10 @@ public class Player {
         this.isAlive = isAlive;
     }
 
+    /**
+     * Take damage.
+     * @param damage how much damage to take.
+     */
     public void takeDamage(int damage) {
         if (health - damage <= 0) {
             isAlive = false;
@@ -265,6 +303,9 @@ public class Player {
         health -= damage;
     }
 
+    /**
+     * Respawn the player.
+     */
     public void respawn() {
         health = MAX_HEALTH;
         score = 0;
@@ -296,6 +337,10 @@ public class Player {
         this.score += score;
     }
 
+    /**
+     * Add a powerup to the player.
+     * @param powerup powerup to add.
+     */
     public void addPowerUp(Powerup powerup) {
         // Add the bonus value to the current stats.
         health = Math.min(MAX_HEALTH, (int) (health + powerup.getHealthBonus()));
