@@ -102,7 +102,7 @@ public class App extends JPanel implements Runnable {
 
         // Load textures and sounds.
         try {
-            skyTexture = ImageIO.read(new File("resources/sky_textures/sky2.png"));
+            skyTexture = ImageIO.read(new File("resources/sky_textures/sky4.png"));
             skyWidth = skyTexture.getWidth();
             wallTexture = ImageIO.read(new File("resources/wall_textures/brick9.png"));
             wallTextureWidth = wallTexture.getWidth();
