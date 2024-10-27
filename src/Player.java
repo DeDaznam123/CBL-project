@@ -14,7 +14,7 @@ public class Player {
     // Depth of field (Largest side of the grid.)
     private static final int DOF = Grid.getSize() * Grid.getSize();
     // How much to rotate the player.
-    private static final double ROTATION_INCREMENT = 0.015;
+    private static final double ROTATION_INCREMENT = 0.02;
 
     // Distance at which player collides with a wall.
     private static final int HITBOX_SIZE = 5;

@@ -20,8 +20,10 @@ import javax.sound.sampled.FloatControl;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
-
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Main JPanel.
@@ -78,20 +80,22 @@ public class App extends JPanel implements Runnable {
     private static boolean paused = false;
 
     // Menu buttons.
-    JButton resumeButton = new JButton("Resume");
-    JButton restartButton = new JButton("Restart");
-    JButton exitButton = new JButton("Exit");
-
+    private JButton resumeButton = new JButton("Resume");
+    private JButton restartButton = new JButton("Restart");
+    private JButton exitButton = new JButton("Exit");
+    private JSlider volumeSlider;
 
     /**
      * App constructor.
      */
     public App() {
+
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setLayout(null);
         this.addKeyListener(inputHandler);
         this.addMouseListener(inputHandler);
         this.setFocusable(true);
+        this.requestFocus();
 
         // Initialize the UI elements.
         init();
@@ -128,6 +132,28 @@ public class App extends JPanel implements Runnable {
      * Pre-load the UI elements.
      */
     public void init() {
+
+        // Volume slider.
+        volumeSlider = new JSlider(JSlider.HORIZONTAL, -40, 6, 0);
+        volumeSlider.setBounds(WIDTH / 2 - 150, HEIGHT / 2 + 70, 300, 50);
+        volumeSlider.setMajorTickSpacing(10);
+        volumeSlider.setMinorTickSpacing(1);
+        volumeSlider.setPaintTicks(false);
+        volumeSlider.setPaintLabels(false);
+        volumeSlider.setFont(FONT);
+        volumeSlider.setBackground(new Color(45, 45, 45, 1));
+        volumeSlider.setForeground(Color.WHITE);
+        volumeSlider.setOpaque(true);
+        volumeSlider.setFocusable(false);
+
+        volumeSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                float volume = volumeSlider.getValue();
+                setGlobalVolume(volume);
+            }
+        });
+        
         // Resume button.
         resumeButton.setBounds(WIDTH / 2 - 150, HEIGHT / 2 - 145, 300, 50);
         resumeButton.setFont(FONT);
@@ -149,7 +175,7 @@ public class App extends JPanel implements Runnable {
             resumeButton.setVisible(false);
             restartButton.setVisible(false);
             exitButton.setVisible(false);
-
+            volumeSlider.setVisible(false);
         });
 
         resumeButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -211,10 +237,12 @@ public class App extends JPanel implements Runnable {
         resumeButton.setVisible(false);
         restartButton.setVisible(false);
         exitButton.setVisible(false);
+        volumeSlider.setVisible(false);
 
         this.add(resumeButton);
         this.add(restartButton);
         this.add(exitButton);
+        this.add(volumeSlider);
     }
 
     private void restartApplication() {
@@ -351,6 +379,19 @@ public class App extends JPanel implements Runnable {
     }
 
     /**
+     * Sets the volume of the entire app.
+     * @param volume Volume to set.
+     */
+    public static void setGlobalVolume(float volume) {
+        for (Clip clip : soundMap.values()) {
+            if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                volumeControl.setValue(volume);
+            }
+        }
+    }
+
+    /**
      * Enemy logic.
      */
     public void updateEnemy() {
@@ -472,6 +513,7 @@ public class App extends JPanel implements Runnable {
             resumeButton.setVisible(false);
             restartButton.setVisible(false);
             exitButton.setVisible(false);
+            volumeSlider.setVisible(false);
         }
     }
 
@@ -662,12 +704,14 @@ public class App extends JPanel implements Runnable {
         g2d.setFont(BIG_FONT);
         g2d.drawString("Paused", WIDTH / 2 - 55, HEIGHT / 2 - 170);
         g2d.setFont(FONT);
+        g2d.drawString("Volume", WIDTH / 2 - 30, HEIGHT / 2 + 70);
         g2d.drawString("© 2024 Victor Handzhiev & Miguel Lebrun", WIDTH / 2 - 145, HEIGHT - 100);
         
         resumeButton.setText("Resume");
         resumeButton.setVisible(true);
         restartButton.setVisible(true);
         exitButton.setVisible(true);
+        volumeSlider.setVisible(true);
 
         setCursor(Cursor.getDefaultCursor());
     }
