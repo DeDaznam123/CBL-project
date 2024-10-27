@@ -18,3 +18,9 @@ Sound effects made using:
 
 Music made using:
 - https://www.beepbox.co/
+
+Texture of the enemies:
+- https://opengameart.org/content/zombies-skeletons
+
+Texture of sky:
+- 
