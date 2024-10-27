@@ -19,8 +19,8 @@ Sound effects made using:
 Music made using:
 - https://www.beepbox.co/
 
-Texture of the enemies:
-- https://opengameart.org/content/zombies-skeletons
-
-Texture of sky:
+Sky texture:
 - https://hdri-haven.com/hdri/dark-overast-sky-dome
+
+Enemy Texture:
+- https://zerie.itch.io/tiny-rpg-character-asset-pack

@@ -679,7 +679,7 @@ public class App extends JPanel implements Runnable {
 
         // Draw the enemy as a rectangle
         int adjustedX = enemyScreenX - enemySize / 2;
-        int adjustedY = HEIGHT / 2 - enemySize / 2;
+        int adjustedY = HEIGHT / 2;
 
         double[][] castResults = player.castRay(adjustedX + enemySize / 2);
         if (distance > Math.min(castResults[0][0], castResults[1][0])) {
@@ -875,8 +875,8 @@ public class App extends JPanel implements Runnable {
         
         int healthBarWidth = 30;
         int healthBarHeight = 5;
-        int healthBarX = enemyScreenX - healthBarWidth / 2;
-        int healthBarY = HEIGHT / 2 - enemySize / 2 - healthBarHeight - 2;
+        int healthBarX = enemyScreenX - healthBarWidth;
+        int healthBarY = HEIGHT / 2 - healthBarHeight - 10;
 
         g2d.setColor(Color.BLACK);
         g2d.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
@@ -936,14 +936,16 @@ public class App extends JPanel implements Runnable {
 
         // Length of the crosshair.
         int size = 20;
-    
+        int offsetY = 30;
+
         g2d.setColor(Color.WHITE);
-        g2d.fillRect(WIDTH / 2 - size / 2, HEIGHT / 2 - 1, size, 2);
-        g2d.fillRect(WIDTH / 2 - 1, HEIGHT / 2 - size / 2, 2, size);
+        g2d.fillRect(WIDTH / 2 - size / 2, HEIGHT / 2 - 1 + offsetY, size, 2);
+        g2d.fillRect(WIDTH / 2 - 1, HEIGHT / 2 - size / 2 + offsetY, 2, size);
     
         g2d.setColor(Color.BLACK);
-        g2d.drawRect(WIDTH / 2 - size / 2, HEIGHT / 2 - 1, size, 2);
-        g2d.drawRect(WIDTH / 2 - 1, HEIGHT / 2 - size / 2, 2, size);
+        g2d.drawRect(WIDTH / 2 - size / 2, HEIGHT / 2 - 1 + offsetY, size, 2);
+        g2d.drawRect(WIDTH / 2 - 1, HEIGHT / 2 - size / 2 + offsetY, 2, size);
+    
     }
     
     /**

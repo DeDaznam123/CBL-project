@@ -16,7 +16,7 @@ public class Enemy {
     protected int health;
     protected int damage;
     protected int scoreValue;
-    protected int size = 32;
+    protected int size = 48;
 
     // Coordinates of the enemy.
     protected double x;
