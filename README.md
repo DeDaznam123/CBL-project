@@ -12,3 +12,9 @@ Used to implement sound effects:
 
 Used to implement the Runnable interface and Game thread:
 - https://docs.oracle.com/javase/8/docs/api/?java/lang/Runnable.html
+
+Sound effects made using:
+- https://sfxr.me/
+
+Music made using:
+- https://www.beepbox.co/
