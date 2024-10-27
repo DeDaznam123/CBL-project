@@ -1,18 +1,14 @@
-## Getting Started
+# Sources
+- - - 
+Used to implement the Ray-casting algorithm:
+- https://permadi.com/1996/05/ray-casting-tutorial-table-of-contents/
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Used to implement the A* Algorithm:
+- https://en.wikipedia.org/wiki/A*_search_algorithm
 
-## Folder Structure
+Used to implement sound effects:
+- https://docs.oracle.com/javase/8/docs/api/index.html?javax/sound/sampled/Clip.html
+- https://docs.oracle.com/en/java/javase/11/docs/api/java.desktop/javax/sound/sampled/FloatControl.html
 
-The workspace contains two folders by default, where:
-
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+Used to implement the Runnable interface and Game thread:
+- https://docs.oracle.com/javase/8/docs/api/?java/lang/Runnable.html
