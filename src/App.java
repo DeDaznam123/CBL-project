@@ -277,11 +277,11 @@ public class App extends JPanel implements Runnable {
         Grid.generateGrid();
 
         // Initialize the enemies
-        enemies.add(new Enemy(player, 1));
-        enemies.add(new Enemy(player, 2));
-        enemies.add(new Enemy(player, 3));
-        enemies.add(new Enemy(player, 4));
-        enemies.add(new Enemy(player, 5));
+        enemies.add(new Enemy(player, 0));
+        enemies.add(new Enemy(player, 0));
+        enemies.add(new Enemy(player, 0));
+        enemies.add(new Enemy(player, 0));
+        enemies.add(new Enemy(player, 0));
 
         // Initialize the powerups.
         powerups.add(new Powerup(50, 5, 0, 5));

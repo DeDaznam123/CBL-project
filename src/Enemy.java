@@ -51,7 +51,6 @@ public class Enemy {
         this.damage = 1;
         this.health = 100;
         this.texture = enemyTextures[enemyTextureIndex];
-        this.enemyTextureIndex = 0;
         spawn();
     }
 
